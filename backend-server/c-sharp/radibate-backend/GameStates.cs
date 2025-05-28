@@ -1,6 +1,7 @@
 using System;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
+using System.Security;
 
 namespace radibate_backend;
 
@@ -22,7 +23,7 @@ public abstract class GameState
         private PublicDiscussionPhase? publicDiscussionPhase;
         public override async Task PlayPhase()
         {
-            stanceTakingPhase = new StanceTakingPhase(parentGame);
+            stanceTakingPhase = new StanceTakingPhase(parentGame, parentGame.playerList);
             await stanceTakingPhase.PlayPhase();
 
             publicDiscussionPhase = new PublicDiscussionPhase(parentGame);
@@ -50,10 +51,18 @@ public abstract class GameState
         public Game.Player[] debaters = new Game.Player[2];
         public string[] positions = new string[2];
 
-        public StanceTakingPhase(Game parentGame) : base(parentGame)
+        public StanceTakingPhase(Game parentGame, List<Game.Player> playersToPickFrom) : base(parentGame)
         {
-            // TODO - CHOOSE TWO PEOPLE
-            // TODO - CHOOSE TOPIC
+            // Pick two random people from the Players to Pick From var.
+            playersToPickFrom = [.. playersToPickFrom]; // Shallow clone.
+            playersToPickFrom.Shuffle();
+
+            for (int i = 0; i < debaters.Length; i++)
+            {
+                debaters[i] = playersToPickFrom[i];
+            }
+
+            discussionTopic = GetRandomDebateTopic();
         }
 
         public async override Task PlayPhase()
@@ -68,8 +77,9 @@ public abstract class GameState
 
         public static string GetRandomDebateTopic()
         {
-            // TODO - Actually randomize the topics.
-            return "Is Last Minute Panic a Valid Productivity Strategy?";
+            string[] allQuestions = File.ReadAllLines("/assets/questions.txt");
+
+            return allQuestions[Utils.rng.Next(allQuestions.Length)];
         }
     }
 

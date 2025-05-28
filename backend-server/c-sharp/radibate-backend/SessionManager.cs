@@ -87,15 +87,10 @@ public class SessionManager
 
             Console.WriteLine($"[Connection] Client {clientIP} passed handshake.");
 
-            // Step 2: register the session
-            var session = new GameInfo { ClientId = clientIP ?? "Unknown" };
-            gameSessions[session.ClientId] = session;
+            // Step 2: hand control to game session handler
+            await GameSessionLoopAsync(stream, token);
 
-            // Step 3: hand control to game session handler
-            await GameSessionLoopAsync(session, stream, token);
-
-            // Step 4: cleanup
-            gameSessions.TryRemove(session.ClientId, out _);
+            // Step 3: cleanup
             Console.WriteLine($"[Connection] Client {clientIP} disconnected.");
         }
     }
@@ -134,12 +129,12 @@ public class SessionManager
     }
 
     // Placeholder game session logic; right now it just echoes back messages
-    private async Task GameSessionLoopAsync(GameInfo session, NetworkStream stream, CancellationToken token)
+    private async Task GameSessionLoopAsync(NetworkStream stream, CancellationToken token)
     {
         byte[] buffer = new byte[1024];
 
         try
-        {
+        { // TODO: This is a placeholder that just sends back messages and does not handle them at ALL.
             while (!token.IsCancellationRequested)
             {
                 int bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), token);
@@ -148,7 +143,7 @@ public class SessionManager
 
                 string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
 
-                Console.WriteLine($"[Game] From {session.ClientId}: {message}");
+                Console.WriteLine($"[Game] Received message: {message}");
 
                 // Echo back the received message with an ACK
                 string reply = $"ACK: {message}\n";
@@ -158,9 +153,10 @@ public class SessionManager
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Game] Error with {session.ClientId}: {ex.Message}");
+            Console.WriteLine($"[Game] Error: {ex.Message}");
         }
     }
+
 
 
     GameInfo StartNewGame()
@@ -168,12 +164,10 @@ public class SessionManager
         GameInfo newGameSession = new GameInfo();
 
         // Check if we have no duplication of session keys.
-        while (gameSessions.ContainsKey(newGameSession.SessionKey))
+        while (gameSessions.TryAdd(newGameSession.SessionKey, newGameSession))
         {
             newGameSession.GenerateSessionKey();
         }
-
-        //gameSessions.Add(newGameSession.SessionKey, newGameSession); //TODO: FIX!
 
         newGameSession.StartGame();
 
@@ -182,8 +176,6 @@ public class SessionManager
 
     public class GameInfo
     {
-        // Placeholder for actual game session information
-        public string ClientId { get; set; } = "";
         public Game? Game { get; private set; }
         public string SessionKey { get; private set; }
 
@@ -199,7 +191,7 @@ public class SessionManager
             {
                 throw new Exception("Generated new session key for a game in progress!");
             }
-            SessionKey = GlobalData.random.Next(0, 1000000).ToString();
+            SessionKey = Utils.rng.Next(0, 1000000).ToString();
             return SessionKey;
         }
 
