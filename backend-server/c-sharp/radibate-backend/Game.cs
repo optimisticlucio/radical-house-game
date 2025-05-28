@@ -1,4 +1,5 @@
 using System;
+using System.Net.WebSockets;
 
 namespace radibate_backend;
 
