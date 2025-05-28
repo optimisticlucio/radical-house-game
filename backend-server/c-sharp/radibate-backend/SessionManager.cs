@@ -1,177 +1,155 @@
 using System;
-using System.Collections.Concurrent; // Thread-safe dictionary
 using System.Net;
-using System.Net.Sockets;
+using System.Net.WebSockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace radibate_backend;
 
-
 public class SessionManager
 {
-    // IP and port to bind the server to (localhost and port 8080)
-    public static string ServerIPAddress = "127.0.0.1";
-    public static int ServerPort = 8080;
-
-    private TcpListener? server; // Listens for TCP connections
-    private readonly ConcurrentDictionary<string, GameInfo> gameSessions = new(); // Safe to use across threads
-    private CancellationTokenSource? cancellationTokenSource; // Used to stop the server cleanly
+    public static string ServerAddress = "http://127.0.0.1:8080/";
+    private readonly HttpListener httpListener = new();
+    private readonly ConcurrentDictionary<string, GameInfo> gameSessions = new();
+    private CancellationTokenSource? cts;
 
     public void Start()
     {
-        // Bind the server to the IP and port
-        server = new TcpListener(IPAddress.Parse(ServerIPAddress), ServerPort);
-        server.Start();
-        cancellationTokenSource = new CancellationTokenSource();
+        httpListener.Prefixes.Add(ServerAddress);
+        httpListener.Start();
+        cts = new CancellationTokenSource();
+        Console.WriteLine($"[Server] Listening on {ServerAddress}");
 
-        Console.WriteLine($"[Server] Listening on {ServerIPAddress}:{ServerPort}.");
-
-        // Start listening for clients in the background (non-blocking)
-        _ = ListenForConnectionsAsync(cancellationTokenSource.Token);
+        _ = AcceptConnectionsAsync(cts.Token); // Fire and forget
     }
 
     public void Stop()
     {
-        // Tell the server to stop accepting new connections
-        cancellationTokenSource?.Cancel();
-        server?.Stop();
+        cts?.Cancel();
+        httpListener.Stop();
         Console.WriteLine("[Server] Stopped.");
     }
 
-    // Accepts new clients in a loop, one by one
-    private async Task ListenForConnectionsAsync(CancellationToken token)
+    private async Task AcceptConnectionsAsync(CancellationToken token)
     {
-        if (server == null)
-            throw new InvalidOperationException("Server not initialized.");
-
         try
         {
             while (!token.IsCancellationRequested)
             {
-                // Accept client connection (waits here until one arrives)
-                TcpClient client = await server.AcceptTcpClientAsync(token);
+                HttpListenerContext context = await httpListener.GetContextAsync();
 
-                // Start handling the new client in a separate Task/thread
-                _ = Task.Run(() => HandleClientAsync(client, token), token);
+                // Only accept WebSocket upgrade requests
+                if (context.Request.IsWebSocketRequest)
+                    _ = Task.Run(() => HandleWebSocketClientAsync(context, token), token);
+                else
+                {
+                    context.Response.StatusCode = 400;
+                    context.Response.Close();
+                }
             }
         }
-        catch (OperationCanceledException)
-        {
-            Console.WriteLine("[Server] Listener cancelled.");
-        }
+        catch (HttpListenerException) { } // Listener closed
         catch (Exception ex)
         {
-            Console.WriteLine($"[Server] Unexpected error: {ex.Message}");
+            Console.WriteLine($"[Server] Error: {ex.Message}");
         }
     }
 
-    // Handles a single client: does handshake, then talks to GameManager
-    private async Task HandleClientAsync(TcpClient client, CancellationToken token)
+    private async Task HandleWebSocketClientAsync(HttpListenerContext context, CancellationToken token)
     {
-        using (client) // Automatically clean up the connection after done
+        WebSocket webSocket = null!;
+        string clientId = Guid.NewGuid().ToString();
+
+        try
         {
-            // Try to get the IP address of the client
-            string? clientIP = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString();
-            Console.WriteLine($"[Connection] New client connected: {clientIP}");
+            WebSocketContext wsContext = await context.AcceptWebSocketAsync(null);
+            webSocket = wsContext.WebSocket;
+            Console.WriteLine($"[Connection] Client {clientId} connected.");
 
-            NetworkStream stream = client.GetStream(); // Low-level read/write stream
-
-            // Step 1: handshake — check if client is legit
-            if (!await PerformHandshakeAsync(stream, token))
+            // Step 1: handshake
+            if (!await PerformHandshakeAsync(webSocket, token))
             {
-                Console.WriteLine($"[Connection] Client {clientIP} failed handshake.");
+                await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Invalid handshake", token);
+                Console.WriteLine($"[Connection] Client {clientId} failed handshake.");
                 return;
             }
 
-            Console.WriteLine($"[Connection] Client {clientIP} passed handshake.");
+            Console.WriteLine($"[Connection] Client {clientId} passed handshake.");
 
-            // Step 2: hand control to game session handler
-            await GameSessionLoopAsync(stream, token);
+            // Step 2: game loop
+            await GameSessionLoopAsync(webSocket, token);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Connection] Error: {ex.Message}");
+        }
+        finally
+        {
+            if (webSocket != null)
+                webSocket.Dispose();
 
-            // Step 3: cleanup
-            Console.WriteLine($"[Connection] Client {clientIP} disconnected.");
+            Console.WriteLine($"[Connection] Client {clientId} disconnected.");
         }
     }
 
-    // Very basic handshake — just checks if the client sends a specific message
-    private async Task<bool> PerformHandshakeAsync(NetworkStream stream, CancellationToken token)
+    private async Task<bool> PerformHandshakeAsync(WebSocket socket, CancellationToken token)
     {
-        try
+        var buffer = new byte[1024];
+        var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+
+        string msg = Encoding.UTF8.GetString(buffer, 0, result.Count).Trim();
+        Console.WriteLine($"[Handshake] Received: {msg}");
+
+        if (msg == "HELLO GAME")
         {
-            byte[] buffer = new byte[1024];
-
-            // Wait for data from the client (blocks until message or disconnect)
-            int byteCount = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), token);
-            string handshakeMsg = Encoding.UTF8.GetString(buffer, 0, byteCount).Trim();
-
-            Console.WriteLine($"[Handshake] Received: {handshakeMsg}");
-
-            // Expect the client to say "HELLO GAME"
-            if (handshakeMsg == "HELLO GAME")
-            {
-                byte[] response = Encoding.UTF8.GetBytes("WELCOME\n");
-                await stream.WriteAsync(response.AsMemory(), token);
-                return true;
-            }
-            else
-            {
-                byte[] response = Encoding.UTF8.GetBytes("INVALID HANDSHAKE\n");
-                await stream.WriteAsync(response.AsMemory(), token);
-                return false;
-            }
+            var response = Encoding.UTF8.GetBytes("WELCOME\n");
+            await socket.SendAsync(new ArraySegment<byte>(response), WebSocketMessageType.Text, true, token);
+            return true;
         }
-        catch
+        else
         {
+            var response = Encoding.UTF8.GetBytes("INVALID HANDSHAKE\n");
+            await socket.SendAsync(new ArraySegment<byte>(response), WebSocketMessageType.Text, true, token);
             return false;
         }
     }
 
-    // Placeholder game session logic; right now it just echoes back messages
-    private async Task GameSessionLoopAsync(NetworkStream stream, CancellationToken token)
+    private async Task GameSessionLoopAsync(WebSocket socket, CancellationToken token)
     {
-        byte[] buffer = new byte[1024];
+        var buffer = new byte[1024];
 
-        try
-        { // TODO: This is a placeholder that just sends back messages and does not handle them at ALL.
-            while (!token.IsCancellationRequested)
-            {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), token);
-
-                if (bytesRead == 0) break; // Client disconnected
-
-                string message = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
-
-                Console.WriteLine($"[Game] Received message: {message}");
-
-                // Echo back the received message with an ACK
-                string reply = $"ACK: {message}\n";
-                byte[] response = Encoding.UTF8.GetBytes(reply);
-                await stream.WriteAsync(response.AsMemory(), token);
-            }
-        }
-        catch (Exception ex)
+        while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
         {
-            Console.WriteLine($"[Game] Error: {ex.Message}");
+            var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+
+            if (result.MessageType == WebSocketMessageType.Close)
+            {
+                await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Goodbye", token);
+                break;
+            }
+
+            string msg = Encoding.UTF8.GetString(buffer, 0, result.Count).Trim();
+            Console.WriteLine($"[Game] Received message: {msg}");
+
+            string reply = $"ACK: {msg}\n";
+            var response = Encoding.UTF8.GetBytes(reply);
+
+            await socket.SendAsync(new ArraySegment<byte>(response), WebSocketMessageType.Text, true, token);
         }
     }
 
-
-
+    // Starts and registers a new game session
     GameInfo StartNewGame()
     {
-        GameInfo newGameSession = new GameInfo();
+        GameInfo newGame = new();
 
-        // Check if we have no duplication of session keys.
-        while (gameSessions.TryAdd(newGameSession.SessionKey, newGameSession))
+        while (!gameSessions.TryAdd(newGame.SessionKey, newGame))
         {
-            newGameSession.GenerateSessionKey();
+            newGame.GenerateSessionKey(); // ensure no duplicate keys
         }
 
-        newGameSession.StartGame();
-
-        return newGameSession;
+        newGame.StartGame();
+        return newGame;
     }
 
     public class GameInfo
@@ -188,9 +166,8 @@ public class SessionManager
         public string GenerateSessionKey()
         {
             if (Game != null)
-            {
-                throw new Exception("Generated new session key for a game in progress!");
-            }
+                throw new Exception("Tried to generate new key for active game.");
+
             SessionKey = Utils.rng.Next(0, 1000000).ToString();
             return SessionKey;
         }
@@ -198,9 +175,8 @@ public class SessionManager
         public void StartGame()
         {
             if (Game != null)
-            {
-                throw new Exception("Attempted to overwrite game in progress!");
-            }
+                throw new Exception("Game already started.");
+
             Game = new Game();
         }
     }

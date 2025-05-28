@@ -14,8 +14,13 @@ public abstract class GameState
         this.parentGame = parentGame;
     }
     public abstract Task PlayPhase();
+
+    public abstract Task RecievePlayerMessage();
     public abstract void End();
 
+    // TODO: Add a "Show Results" state
+    // TODO: Actually handle Recieve Player Message
+    // TODO: Respond to player messages
 
     public class RenardRadicalRound(Game parentGame) : GameState(parentGame)
     {
@@ -41,6 +46,13 @@ public abstract class GameState
         public override void End()
         {
             // TODO
+        }
+
+        public override async Task RecievePlayerMessage()
+        {
+            if (publicDiscussionPhase != null) publicDiscussionPhase.RecievePlayerMessage();
+            else if (stanceTakingPhase != null) stanceTakingPhase.RecievePlayerMessage();
+            else throw new NullReferenceException("All phases are null!");
         }
 
     }
@@ -80,6 +92,11 @@ public abstract class GameState
             string[] allQuestions = File.ReadAllLines("/assets/questions.txt");
 
             return allQuestions[Utils.rng.Next(allQuestions.Length)];
+        }
+
+        public override async Task RecievePlayerMessage()
+        {
+            // TODO
         }
     }
 
@@ -127,6 +144,11 @@ public abstract class GameState
             {
                 debaters[i].currentScore += finalScores[i];
             }
+        }
+
+        public override async Task RecievePlayerMessage()
+        {
+            // TODO
         }
     }
 }
