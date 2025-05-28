@@ -15,6 +15,8 @@ public class Game
         public string username = "USERNAME_NOT_SET";
         public int currentScore = 0;
 
+        public WebSocket? webSocket;
+
         public Player(string username)
         {
             this.username = username;

@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace radibate_backend;
 
@@ -131,6 +132,22 @@ public class SessionManager
             string msg = Encoding.UTF8.GetString(buffer, 0, result.Count).Trim();
             Console.WriteLine($"[Game] Received message: {msg}");
 
+            IncomingGameMessage incomingClientMessage = IncomingGameMessage.ParseIncomingRequest(msg);
+            switch (incomingClientMessage.messageType)
+            {
+                case IncomingGameMessage.MessageType.CreateGame:
+                    // TODO: Attempt to create a new game.
+                    break;
+                
+                case IncomingGameMessage.MessageType.ConnectToGame:
+                    // TODO: Attempt to connect to an existing game.
+                    break;
+
+                default: //TODO: Throw error or whatever.
+                    break;
+            }
+
+            // TODO: Delete this shit, just sends ACK for every message.
             string reply = $"ACK: {msg}\n";
             var response = Encoding.UTF8.GetBytes(reply);
 
