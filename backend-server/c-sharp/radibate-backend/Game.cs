@@ -4,12 +4,17 @@ namespace radibate_backend;
 
 public class Game
 {
-    List<Player> playerList;
-    GameState currentGamePhase;
+    public List<Player> playerList = [];
+    public GameState? currentGamePhase;
 
     public class Player
     {
-        String username = "USERNAME_NOT_SET";
-        int currentScore = 0;
+        public string username = "USERNAME_NOT_SET";
+        public int currentScore = 0;
+
+        public Player(string username)
+        {
+            this.username = username;
+        }
     }
 }
