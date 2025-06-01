@@ -13,14 +13,14 @@ public class SessionManager
     private readonly ConcurrentDictionary<string, GameInfo> gameSessions = new();
     private CancellationTokenSource? cts;
 
-    public void Start()
+    public Task Start()
     {
         httpListener.Prefixes.Add(ServerAddress);
         httpListener.Start();
         cts = new CancellationTokenSource();
         Console.WriteLine($"[Server] Listening on {ServerAddress}");
 
-        _ = AcceptConnectionsAsync(cts.Token); // Fire and forget
+        return AcceptConnectionsAsync(cts.Token);
     }
 
     public void Stop()

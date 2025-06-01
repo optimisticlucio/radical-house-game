@@ -1,4 +1,4 @@
-const SERVER_ADDRESS = "https://127.0.0.1:8080"
+const SERVER_ADDRESS = "127.0.0.1:8080"
 const socket = new WebSocket("ws://" + SERVER_ADDRESS)
 
 // Log incoming messages
@@ -23,7 +23,7 @@ socket.addEventListener("open", (event) => {
     clearTimeout(handshakeTimeout);
     console.log("Connected to server! Attempting handshake.");
 
-    if (preformHandshake()) {
+    if (performHandshake()) {
         console.log("Handshake successful!");
         displayMainMenu();
     } else {
@@ -58,7 +58,7 @@ function serverDeadNotification() {
 
     let mainDiv = document.createElement("div");
     mainDiv.classList.add("testing-textbox");
-    mainDiv.appendChild(document.createTextNode("Host server unreachable :("))
+    mainDiv.appendChild(document.createTextNode("Host server unreachable :("));
 
     document.body.appendChild(mainDiv);
 }
@@ -68,7 +68,10 @@ function displayMainMenu() {
 
     let mainDiv = document.createElement("div");
     mainDiv.classList.add("testing-textbox");
+    mainDiv.appendChild(document.createTextNode("Host server reached :)"));
     // TODO: Setup main menu and buttons.
+
+    document.body.appendChild(mainDiv);
 }
 
 // ----------- SERVER COMMUNICATION --------------------
