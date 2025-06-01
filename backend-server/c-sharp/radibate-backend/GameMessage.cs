@@ -57,7 +57,7 @@ public class OutgoingGameMessage
     Class that creates messages to send to the controller.
     */
 
-    public required MessageType messageType;
+    public MessageType messageType;
     public string? messageContent;
 
     public OutgoingGameMessage(MessageType messageType, string? messageContent = null)
@@ -83,7 +83,7 @@ public class OutgoingGameMessage
 
         if (messageContent != null)
         {
-            //TODO: Handle this case.
+            outgoingMessage.Add("content", messageContent);
         }
 
         return JsonSerializer.Serialize(outgoingMessage);

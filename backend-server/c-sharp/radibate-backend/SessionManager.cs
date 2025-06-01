@@ -117,7 +117,13 @@ public class SessionManager
 
     private async Task GameSessionLoopAsync(WebSocket socket, CancellationToken token)
     {
+        async Task sendMessageOverSocket(OutgoingGameMessage message)
+        {
+            await SendMessageOverSocket(socket, token, message);
+        }
+
         var buffer = new byte[1024];
+        GameInfo? gameUserIsConnectedTo = null;
 
         while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
         {
@@ -136,27 +142,51 @@ public class SessionManager
             switch (incomingClientMessage.messageType)
             {
                 case IncomingGameMessage.MessageType.CreateGame:
-                    // TODO: Attempt to create a new game.
-                    break;
-                
-                case IncomingGameMessage.MessageType.ConnectToGame:
-                    // TODO: Attempt to connect to an existing game.
+                    if (gameUserIsConnectedTo != null)
+                    {
+                        // User is in a game.
+                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
+                        continue;
+                    }
+                    gameUserIsConnectedTo = StartNewGame(socket);
+                    await gameUserIsConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
                     break;
 
-                default: //TODO: Throw error or whatever.
+                case IncomingGameMessage.MessageType.ConnectToGame:
+                    if (gameUserIsConnectedTo != null)
+                    {
+                        // User is in a game.
+                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot join a game while already in one."));
+                        continue;
+                    }
+                    // TODO: Handle case
+                    break;
+
+                case IncomingGameMessage.MessageType.GameAction:
+                    if (gameUserIsConnectedTo == null)
+                    {
+                        // User is not connected.
+                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot take a game action without being in a game."));
+                        continue;
+                    }
+                    // TODO: Handle case
+                    break;
+
+                default: 
+                    await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Invalid request type recieved."));
+                    Console.WriteLine("[SessionManager] Recieved invalid request type.");
                     break;
             }
-
-            // TODO: Delete this shit, just sends ACK for every message.
-            string reply = $"ACK: {msg}\n";
-            var response = Encoding.UTF8.GetBytes(reply);
-
-            await socket.SendAsync(new ArraySegment<byte>(response), WebSocketMessageType.Text, true, token);
         }
     }
 
+    static async Task SendMessageOverSocket(WebSocket socket, CancellationToken token,  OutgoingGameMessage message)
+    {
+        await socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.ToString())), WebSocketMessageType.Text, true, token);
+    }
+
     // Starts and registers a new game session
-    GameInfo StartNewGame()
+    GameInfo StartNewGame(WebSocket hostSocket)
     {
         GameInfo newGame = new();
 
@@ -165,7 +195,7 @@ public class SessionManager
             newGame.GenerateSessionKey(); // ensure no duplicate keys
         }
 
-        newGame.StartGame();
+        newGame.StartGame(hostSocket);
         return newGame;
     }
 
@@ -189,12 +219,12 @@ public class SessionManager
             return SessionKey;
         }
 
-        public void StartGame()
+        public void StartGame(WebSocket socket)
         {
             if (Game != null)
                 throw new Exception("Game already started.");
 
-            Game = new Game();
+            Game = new Game(socket);
         }
     }
 }

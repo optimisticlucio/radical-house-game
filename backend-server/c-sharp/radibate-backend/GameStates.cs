@@ -22,7 +22,7 @@ public abstract class GameState
         {
             foreach (Game.Player player in parentGame.playerList)
             {
-                
+                //TODO: Send snapshot to given player
             }
         }
         );
@@ -33,6 +33,29 @@ public abstract class GameState
 
     // TODO: Add a "Show Results" state
     // TODO: Respond to player messages
+
+    public class AwaitingPlayersPhase(Game parentGame) : GameState(parentGame)
+    {
+        public override Task End()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task PlayPhase()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     public class RenardRadicalRound(Game parentGame) : GameState(parentGame)
     {
@@ -172,7 +195,7 @@ public abstract class GameState
                     break;
             }
         }
-        
+
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
         {
             return null; // TODO
@@ -249,6 +272,7 @@ public abstract class GameState
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
         {
             Dictionary<string, string> gameSnapshot = new Dictionary<string, string>();
+            gameSnapshot["phase"] = "discussion";
             gameSnapshot["type"] = "InvalidSnapshot"; // If this gets sent to the user something very wrong has occured.
             gameSnapshot["question"] = discussionTopic;
 
@@ -256,7 +280,7 @@ public abstract class GameState
             {
                 // TODO: Return data for host.
                 gameSnapshot["type"] = "host";
-                
+
                 gameSnapshot["debaterNumber"] = debaters.Length.ToString();
                 for (int i = 0; i < debaters.Length; i++)
                 {
@@ -285,8 +309,59 @@ public abstract class GameState
                     gameSnapshot["position" + i] = positions[i];
                 }
             }
-            
-            return gameSnapshot; 
+
+            return gameSnapshot;
+        }
+    }
+
+    public class DisplayResultsPhase: GameState
+    {
+        List<Game.Player> leaderboard;
+
+        public DisplayResultsPhase(Game parentGame) : base(parentGame)
+        {
+            leaderboard = new List<Game.Player>(parentGame.playerList); // Clone list
+            leaderboard.OrderByDescending(x => x.currentScore);
+        }
+
+        public override Task End()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
+        {
+            Dictionary<string, string> gameSnapshot = new Dictionary<string, string>();
+            gameSnapshot["phase"] = "gameEnd";
+            gameSnapshot["type"] = "InvalidSnapshot"; // If this gets sent to the user something very wrong has occured.
+
+            if (requestingPlayer != null)
+            {
+                // TODO: Handle data for players.
+            }
+            else
+            {
+                // TODO: Handle data for host.
+            }
+
+            return gameSnapshot;
+        }
+
+        public override Task PlayPhase()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
+        {
+            if (incomingMessage.requestingSocket != parentGame.hostSocket)
+            {
+                Console.WriteLine("[GAME] Recieved player message after game ended!");
+            }
+            else
+            {
+                // TODO: Handle requesting a new game.
+            }
         }
     }
 }

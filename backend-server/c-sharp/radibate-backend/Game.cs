@@ -7,11 +7,12 @@ public class Game
 {
     public WebSocket hostSocket;
     public List<Player> playerList = [];
-    public GameState? currentGamePhase;
+    public GameState currentGamePhase;
 
     public Game(WebSocket hostSocket)
     {
         this.hostSocket = hostSocket;
+        currentGamePhase = new GameState.AwaitingPlayersPhase(this);
     }
 
     public Player? GetPlayer(WebSocket targetWebSocket)
