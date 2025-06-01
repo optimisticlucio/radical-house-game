@@ -1,5 +1,6 @@
 const SERVER_ADDRESS = "127.0.0.1:8080"
 const socket = new WebSocket("ws://" + SERVER_ADDRESS)
+let currentScreen = "";
 
 // Log incoming messages
 socket.addEventListener("message", (event) => {
@@ -26,10 +27,16 @@ socket.addEventListener("open", (event) => {
     if (performHandshake()) {
         console.log("Handshake successful!");
         displayMainMenu();
+        socket.addEventListener("message", handleIncomingMessage);
     } else {
         console.log("Handshake failed!");
         serverDeadNotification();
     }
+});
+
+socket.addEventListener("close", (event) => {
+    console.log("Websocket closed!");
+    serverDeadNotification();
 });
 
 // ---------------- FRONTEND ------------------------
@@ -54,6 +61,7 @@ function setupTimers() {
 }
 
 function serverDeadNotification() {
+    currentScreen = "serverDead";
     document.body.innerHTML = '';
 
     let mainDiv = document.createElement("div");
@@ -64,14 +72,30 @@ function serverDeadNotification() {
 }
 
 function displayMainMenu() {
+    currentScreen = "mainMenu";
     document.body.innerHTML = '';
 
     let mainDiv = document.createElement("div");
     mainDiv.classList.add("testing-textbox");
     mainDiv.appendChild(document.createTextNode("Host server reached :)"));
+
+    let startGameDiv = document.createElement("div");
+    startGameDiv.classList.add("testing-textbox");
+    let startGameButton = document.createElement("button");
+    startGameButton.onclick = requestNewGameCreation;
+    startGameButton.innerText = "Start New Game";
+    startGameDiv.appendChild(startGameButton);
+    
+    let joinGameDiv = document.createElement("div");
+    joinGameDiv.classList.add("testing-textbox");
+    let joinGameButton = document.createElement("button");
+    joinGameButton.onclick = requestGameJoin;
+    joinGameButton.innerText = "Join Game";
+    joinGameDiv.appendChild(joinGameButton);
+
     // TODO: Setup main menu and buttons.
 
-    document.body.appendChild(mainDiv);
+    document.body.append(mainDiv, startGameDiv, joinGameDiv);
 }
 
 // ----------- SERVER COMMUNICATION --------------------
@@ -91,4 +115,34 @@ function performHandshake() {
         socket.addEventListener("message", handleMessage);
         socket.send("HELLO GAME");
     });
+}
+
+// Given a message type and optional contents, sends it to the server.
+function sendMessageToSocket(messageType, messageContents = null) {
+    let request = {
+        "type": messageType
+    };
+    if (messageContents !== null) {
+        request["contents"] = JSON.stringify(messageContents)
+    }
+
+    socket.send(JSON.stringify(request));
+}
+
+// Ran whenever the websocket sends a message.
+function handleIncomingMessage(event) {
+    
+}
+
+
+function requestNewGameCreation() {
+    sendMessageToSocket("CreateGame");
+}
+
+function requestGameJoin(gameCode) {
+    let messageData = {
+        "gameCode": gameCode
+    };
+
+    sendMessageToSocket("ConnectToGame", messageData);
 }

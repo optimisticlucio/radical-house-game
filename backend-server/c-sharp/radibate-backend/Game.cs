@@ -11,11 +11,14 @@ public class Game
     public List<Player> playerList = [];
     public GameState currentGamePhase;
 
-    public Game(WebSocket hostSocket, CancellationToken hostCancellationToken)
+    public string roomCode;
+
+    public Game(string roomCode, WebSocket hostSocket, CancellationToken hostCancellationToken)
     {
         this.hostSocket = hostSocket;
         this.hostCancellationToken = hostCancellationToken;
         currentGamePhase = new GameState.AwaitingPlayersPhase(this);
+        this.roomCode = roomCode;
     }
 
     public Player? GetPlayer(WebSocket targetWebSocket)

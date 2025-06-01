@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Text.Json;
 
 namespace radibate_backend;
@@ -22,11 +23,20 @@ public abstract class GameState
             {
                 _ = player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(player).ToString())));
             }
-            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(null).ToString())));
+            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(null as Game.Player).ToString())));
         }
         );
     }
 
+    public Dictionary<string, string>? GenerateGameSnapshot(WebSocket socket)
+    {
+        if (parentGame.hostSocket == socket) return GenerateGameSnapshot(null as Game.Player);
+
+        Game.Player? player = parentGame.GetPlayer(socket);
+        if (player != null) return GenerateGameSnapshot(player);
+
+        return null; // Player is not in game.
+    }
     public abstract Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer); // If host requesting, requestingPlayer is null.
     public abstract Task End();
 
@@ -42,7 +52,20 @@ public abstract class GameState
 
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
         {
-            throw new NotImplementedException();
+            Dictionary<string, string> gameSnapshot = new Dictionary<string, string>();
+            gameSnapshot["phase"] = "waitingRoom";
+            gameSnapshot["code"] = parentGame.roomCode;
+
+            if (requestingPlayer == null)
+            { // Host
+                gameSnapshot["playerAmount"] = parentGame.playerList.Count.ToString();
+            }
+            else
+            {
+                gameSnapshot["playerNumber"] = requestingPlayer.playerNumber.ToString();
+            }
+
+            return gameSnapshot;
         }
 
         public override Task PlayPhase()
@@ -274,6 +297,7 @@ public abstract class GameState
             gameSnapshot["phase"] = "discussion";
             gameSnapshot["type"] = "InvalidSnapshot"; // If this gets sent to the user something very wrong has occured.
             gameSnapshot["question"] = discussionTopic;
+            gameSnapshot["secondsLeft"] = countdownTimer.GetRemainingSeconds().ToString();
 
             if (requestingPlayer == null)
             {

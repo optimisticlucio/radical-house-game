@@ -69,7 +69,7 @@ public class OutgoingGameMessage
     public enum MessageType
     {
         InvalidRequest, // Sent back if the user gave an illogical request.
-        GameCreated, // Sent to confirm a game has been created by user request, and tells them the room code.
+        ConnectedAsHost, // Sent to confirm a game has been created by user request, and tells them the room code.
         ConnectedToGame,  // Sent to confirm the user has connected to a room.
         StanceSnapshot  // A snapshot of the current game state to make sure everyone's onboard.
     }

@@ -145,6 +145,7 @@ public class SessionManager
                     {
                         // User is in a game.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
+
                         continue;
                     }
                     gameUserIsConnectedTo = StartNewGame(socket, token);
@@ -223,7 +224,7 @@ public class SessionManager
             if (Game != null)
                 throw new Exception("Game already started.");
 
-            Game = new Game(socket, cancelToken);
+            Game = new Game(SessionKey, socket, cancelToken);
         }
     }
 }
