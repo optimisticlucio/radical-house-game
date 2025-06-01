@@ -1,6 +1,4 @@
-using System;
-using System.Net.WebSockets;
-using System.Security;
+using System.Text.Json;
 
 namespace radibate_backend;
 
@@ -22,8 +20,9 @@ public abstract class GameState
         {
             foreach (Game.Player player in parentGame.playerList)
             {
-                //TODO: Send snapshot to given player
+                _ = player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(player).ToString())));
             }
+            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(null).ToString())));
         }
         );
     }
@@ -314,7 +313,7 @@ public abstract class GameState
         }
     }
 
-    public class DisplayResultsPhase: GameState
+    public class DisplayResultsPhase : GameState
     {
         List<Game.Player> leaderboard;
 

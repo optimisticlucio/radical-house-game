@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Text;
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 
 namespace radibate_backend;
 
@@ -148,7 +147,7 @@ public class SessionManager
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
                         continue;
                     }
-                    gameUserIsConnectedTo = StartNewGame(socket);
+                    gameUserIsConnectedTo = StartNewGame(socket, token);
                     await gameUserIsConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
                     break;
 
@@ -186,7 +185,7 @@ public class SessionManager
     }
 
     // Starts and registers a new game session
-    GameInfo StartNewGame(WebSocket hostSocket)
+    GameInfo StartNewGame(WebSocket hostSocket, CancellationToken cancellationToken)
     {
         GameInfo newGame = new();
 
@@ -195,7 +194,7 @@ public class SessionManager
             newGame.GenerateSessionKey(); // ensure no duplicate keys
         }
 
-        newGame.StartGame(hostSocket);
+        newGame.StartGame(hostSocket, cancellationToken);
         return newGame;
     }
 
@@ -219,12 +218,12 @@ public class SessionManager
             return SessionKey;
         }
 
-        public void StartGame(WebSocket socket)
+        public void StartGame(WebSocket socket, CancellationToken cancelToken)
         {
             if (Game != null)
                 throw new Exception("Game already started.");
 
-            Game = new Game(socket);
+            Game = new Game(socket, cancelToken);
         }
     }
 }
