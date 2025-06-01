@@ -8,6 +8,11 @@ public class Game
     public List<Player> playerList = [];
     public GameState? currentGamePhase;
 
+    public Player? GetPlayer(WebSocket targetWebSocket)
+    {
+        return playerList.Find(x => x.webSocket == targetWebSocket);
+    }
+
     // TODO: Do an actual game loop
 
     public class Player

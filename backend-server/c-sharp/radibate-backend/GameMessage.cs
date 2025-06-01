@@ -1,4 +1,6 @@
 using System;
+using System.Net.WebSockets;
+using System.Security;
 using System.Text.Json;
 
 namespace radibate_backend;
@@ -10,21 +12,25 @@ public class IncomingGameMessage
     */
 
     public MessageType messageType;
-    public string? messageContent;
+    public Dictionary<string, string>? messageContent;
+    public WebSocket? requestingSocket;
 
-    public IncomingGameMessage(MessageType messageType, string? messageContent = null)
+    public IncomingGameMessage(MessageType messageType, Dictionary<string, string>? messageContent = null, WebSocket? websocket = null)
     {
         this.messageType = messageType;
         this.messageContent = messageContent;
+        this.requestingSocket = websocket;
     }
 
     public enum MessageType
     {
-        CreateGame,
-        ConnectToGame
+        CreateGame, // Creates a new game, and places the given user in it.
+        ConnectToGame, // Tries connecting to an existing game.
+        GameAction, // Catchall for requests within the game.
+        RequestStateInfo // Client requests snapshot of the current game state.
     }
 
-    public static IncomingGameMessage ParseIncomingRequest(string message)
+    public static IncomingGameMessage ParseIncomingRequest(string message, WebSocket? websocket = null)
     {
         // TODO: Handle invalid JSON messages.
         var deserializedMessage = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
@@ -32,9 +38,16 @@ public class IncomingGameMessage
         if (deserializedMessage == null) throw new NullReferenceException("Incoming message converted to null - " + message);
         if (!deserializedMessage.ContainsKey("type")) throw new ArgumentException("Incoming message missing type key - " + message);
         MessageType parsedType;
-        if (!Enum.TryParse<MessageType>(deserializedMessage["type"], out parsedType)) throw new ArgumentException("Invalid type key - " + message);
+        if (!Enum.TryParse(deserializedMessage["type"], out parsedType)) throw new ArgumentException("Invalid type key - " + message);
 
-        return new IncomingGameMessage(parsedType);
+        Dictionary<string, string>? messageContent = null;
+        if (deserializedMessage.ContainsKey("content"))
+        {
+            // TODO: Handle invalid JSON content.
+            messageContent = JsonSerializer.Deserialize<Dictionary<string, string>>(deserializedMessage["content"]);
+        }
+
+        return new IncomingGameMessage(parsedType, messageContent, websocket);
     }
 }
 
@@ -55,9 +68,10 @@ public class OutgoingGameMessage
 
     public enum MessageType
     {
-        InvalidRequest,
-        GameCreated,
-        ConnectedToGame
+        InvalidRequest, // Sent back if the user gave an illogical request.
+        GameCreated, // Sent to confirm a game has been created by user request, and tells them the room code.
+        ConnectedToGame,  // Sent to confirm the user has connected to a room.
+        StanceSnapshot  // A snapshot of the current game state to make sure everyone's onboard.
     }
 
     public override string ToString()
