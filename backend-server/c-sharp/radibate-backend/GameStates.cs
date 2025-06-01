@@ -15,7 +15,21 @@ public abstract class GameState
     public abstract Task PlayPhase();
 
     public abstract Task RecievePlayerMessage(IncomingGameMessage incomingMessage);
-    public abstract void End();
+
+    public Task SendSnapshotToAllPlayers()
+    {
+        return Task.Run(() =>
+        {
+            foreach (Game.Player player in parentGame.playerList)
+            {
+                
+            }
+        }
+        );
+    }
+
+    public abstract Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer); // If host requesting, requestingPlayer is null.
+    public abstract Task End();
 
     // TODO: Add a "Show Results" state
     // TODO: Respond to player messages
@@ -41,7 +55,7 @@ public abstract class GameState
             await publicDiscussion;
         }
 
-        public override void End()
+        public override async Task End()
         {
             // TODO
         }
@@ -53,6 +67,12 @@ public abstract class GameState
             else throw new NullReferenceException("All phases are null!");
         }
 
+        public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
+        {
+            if (publicDiscussionPhase != null) return publicDiscussionPhase.GenerateGameSnapshot(requestingPlayer);
+            else if (stanceTakingPhase != null) return stanceTakingPhase.GenerateGameSnapshot(requestingPlayer);
+            else throw new NullReferenceException("All phases are null!");
+        }
     }
 
     public class StanceTakingPhase : GameState
@@ -60,6 +80,7 @@ public abstract class GameState
         public string discussionTopic = "Discussion Topic Not Set!";
         public Game.Player[] debaters = new Game.Player[2];
         public string[] positions = new string[2];
+        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(30);
 
         public StanceTakingPhase(Game parentGame, List<Game.Player> playersToPickFrom) : base(parentGame)
         {
@@ -77,10 +98,14 @@ public abstract class GameState
 
         public async override Task PlayPhase()
         {
-            // TODO
+            Task countdownEnded = countdownTimer.StartAsync();
+
+            _ = SendSnapshotToAllPlayers();
+
+            await countdownEnded;
         }
 
-        public override void End()
+        public override async Task End()
         {
             // TODO - Package the player info nice and neat for someone to get later.
         }
@@ -102,12 +127,14 @@ public abstract class GameState
                         Console.WriteLine("[GAME ERROR] Recieved GameAction with no contents!");
                         break;
                     }
-                    if (incomingMessage.requestingSocket == null) {
+                    if (incomingMessage.requestingSocket == null)
+                    {
                         Console.WriteLine("[GAME ERROR] Recieved GameAction with no passed websocket!");
                         break;
                     }
                     Game.Player? actingPlayer = parentGame.GetPlayer(incomingMessage.requestingSocket);
-                    if (actingPlayer == null) {
+                    if (actingPlayer == null)
+                    {
                         Console.WriteLine("[GAME ERROR] Recieved GameAction from a player who's not in the game!");
                         break;
                     }
@@ -145,6 +172,11 @@ public abstract class GameState
                     break;
             }
         }
+        
+        public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
+        {
+            return null; // TODO
+        }
     }
 
     public class PublicDiscussionPhase(Game parentGame) : GameState(parentGame)
@@ -152,6 +184,8 @@ public abstract class GameState
         private string discussionTopic = "Discussion Topic Not Set!";
         private Game.Player[] debaters = new Game.Player[2];
         private string[] positions = new string[2];
+
+        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(60);
 
         // Represents which player agrees with what stance. If player X agrees with the first debater, playerstances[x] = 0.
         // -1 means did not vote or abstained.
@@ -171,10 +205,13 @@ public abstract class GameState
 
         public async override Task PlayPhase()
         {
+            Task countdownEnded = countdownTimer.StartAsync();
             // TODO
+
+            await countdownEnded;
         }
 
-        public override void End()
+        public override async Task End()
         {
             // Gives each debater a score relative to the people who agreed with them.
             int[] finalScores = new int[debaters.Length];
@@ -207,6 +244,49 @@ public abstract class GameState
                     Console.WriteLine("[GAME] Client message invalid during StanceTakingPhase.");
                     break;
             }
+        }
+
+        public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
+        {
+            Dictionary<string, string> gameSnapshot = new Dictionary<string, string>();
+            gameSnapshot["type"] = "InvalidSnapshot"; // If this gets sent to the user something very wrong has occured.
+            gameSnapshot["question"] = discussionTopic;
+
+            if (requestingPlayer == null)
+            {
+                // TODO: Return data for host.
+                gameSnapshot["type"] = "host";
+                
+                gameSnapshot["debaterNumber"] = debaters.Length.ToString();
+                for (int i = 0; i < debaters.Length; i++)
+                {
+                    // TODO: Pass which players support this given debater. BUCKET THAT SHIT.
+                    gameSnapshot["debater" + i] = debaters[i].playerNumber.ToString();
+                    gameSnapshot["position" + i] = positions[i];
+                }
+            }
+
+            else if (debaters.Contains(requestingPlayer))
+            {
+                // Return data for debaters.
+                gameSnapshot["type"] = "debater";
+                gameSnapshot["message"] = "Don't look at your phone, CONVINCE PEOPLE!";
+                gameSnapshot["position"] = positions[requestingPlayer.playerNumber];
+            }
+
+            else
+            {
+                // TODO: Return data for players who need to pick.
+                gameSnapshot["type"] = "pickingPlayer";
+                gameSnapshot["debaterNumber"] = debaters.Length.ToString();
+                for (int i = 0; i < debaters.Length; i++)
+                {
+                    gameSnapshot["debater" + i] = debaters[i].playerNumber.ToString();
+                    gameSnapshot["position" + i] = positions[i];
+                }
+            }
+            
+            return gameSnapshot; 
         }
     }
 }
