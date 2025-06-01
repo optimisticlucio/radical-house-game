@@ -1,0 +1,65 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+
+    background-image: url("./assets/img/background-1.avif");
+}
+
+* { 
+    box-sizing: border-box;
+}
+
+.testing-textbox {
+    padding: 0.5ch;
+    background-color: beige;
+    border: 0.5ch solid black;
+    text-align: center;
+    margin: 0.5ch;
+}
+
+.ongoing-debate-host {
+    width: 60ch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.ongoing-debate-host > .timer {
+    background-color:aliceblue;
+    color:chocolate;
+}
+
+.ongoing-debate-host > .debate-question {
+    text-transform: uppercase;
+}
+
+.ongoing-debate-host > .debate-options {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 1em 0;
+}
+
+.ongoing-debate-host .player-stance {
+    height: 100%;
+}
+
+.ongoing-debate-host .player-stance > .supporters {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 4ch);
+    gap: 0.5ch;
+}
+
+.character-icon {
+    max-width: 4ch;
+    max-height: 4ch;
+}
