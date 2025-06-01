@@ -58,9 +58,9 @@ public class OutgoingGameMessage
     */
 
     public MessageType messageType;
-    public string? messageContent;
+    public object? messageContent;
 
-    public OutgoingGameMessage(MessageType messageType, string? messageContent = null)
+    public OutgoingGameMessage(MessageType messageType, object? messageContent = null)
     {
         this.messageType = messageType;
         this.messageContent = messageContent;
@@ -76,7 +76,7 @@ public class OutgoingGameMessage
 
     public override string ToString()
     {
-        Dictionary<string, string> outgoingMessage = new Dictionary<string, string>()
+        Dictionary<string, object> outgoingMessage = new Dictionary<string, object>()
         {
             {"type", Enum.GetName(messageType)!}
         };

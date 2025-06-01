@@ -21,9 +21,9 @@ public abstract class GameState
         {
             foreach (Game.Player player in parentGame.playerList)
             {
-                _ = player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(player))));
+                _ = player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(player)));
             }
-            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, JsonSerializer.Serialize(GenerateGameSnapshot(null as Game.Player))));
+            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(null as Game.Player)));
         }
         );
     }
