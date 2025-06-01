@@ -28,6 +28,12 @@ public abstract class GameState
         );
     }
 
+    public async Task Act()
+    {
+        await PlayPhase();
+        await End();
+    }
+
     public Dictionary<string, string>? GenerateGameSnapshot(WebSocket socket)
     {
         if (parentGame.hostSocket == socket) return GenerateGameSnapshot(null as Game.Player);

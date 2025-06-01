@@ -31,6 +31,20 @@ public class Game
         await hostSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.ToString())), WebSocketMessageType.Text, true, hostCancellationToken);
     }
 
+    public async Task PlayRenardEdition()
+    {
+        const int TOTAL_ROUNDS = 1;
+
+        for (int i = 0; i < TOTAL_ROUNDS; i++)
+        {
+            currentGamePhase = new GameState.RenardRadicalRound(this);
+            await currentGamePhase.Act();
+        }
+
+        currentGamePhase = new GameState.DisplayResultsPhase(this);
+        _ = currentGamePhase.SendSnapshotToAllPlayers();
+    }
+
     // TODO: Do an actual game loop
 
     public class Player
