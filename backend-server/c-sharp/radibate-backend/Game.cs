@@ -6,6 +6,7 @@ namespace radibate_backend;
 
 public class Game
 {
+    public const int MAX_PLAYERS = 8;
     public WebSocket hostSocket;
     public CancellationToken hostCancellationToken;
     public List<Player> playerList = [];
@@ -26,16 +27,26 @@ public class Game
         Player newPlayer = new Player("USERNAMES_NOT_HANDLED_YET", newPlayerSocket, newPlayerToken);
         playerList.Add(newPlayer);
 
-        OutgoingGameMessage notifyAboutNewPlayer = new OutgoingGameMessage(
-            OutgoingGameMessage.MessageType.GameUpdate,
-            new Dictionary<string, string>()
+        // Give player an unused player number.
+        for (int i = playerList.Count; i > 0; i--) {
+            if (playerList.Find((item) => item.playerNumber == i) == null)
             {
+                newPlayer.playerNumber = i;
+                break;
+            }
+        }
+
+            OutgoingGameMessage notifyAboutNewPlayer = new OutgoingGameMessage(
+                OutgoingGameMessage.MessageType.GameUpdate,
+                new Dictionary<string, string>()
+                {
                 {"event", "playerJoin"},
                 {"username", newPlayer.username},
                 {"playerNum", newPlayer.playerNumber.ToString()},
                 {"totalPlayers", playerList.Count.ToString()}
-            });
+                });
         await SendMessageToHost(notifyAboutNewPlayer);
+        await newPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, currentGamePhase.GenerateGameSnapshot(newPlayer)));
     } 
 
     public Player? GetPlayer(WebSocket targetWebSocket)

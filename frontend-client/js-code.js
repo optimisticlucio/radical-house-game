@@ -90,12 +90,15 @@ function displayMainMenu() {
     
     let joinGameDiv = document.createElement("div");
     joinGameDiv.classList.add("testing-textbox");
+    let joinGameTextInput = document.createElement("input");
+    joinGameTextInput.type = "text";
+    joinGameTextInput.placeholder = "Insert Room Code.."
+    // TODO: Validate that the inputted room code is a valid one?
+    joinGameDiv.appendChild(joinGameTextInput);
     let joinGameButton = document.createElement("button");
-    joinGameButton.onclick = requestGameJoin;
+    joinGameButton.onclick = (() => requestGameJoin(joinGameTextInput.value));
     joinGameButton.innerText = "Join Game";
     joinGameDiv.appendChild(joinGameButton);
-
-    // TODO: Setup main menu and buttons.
 
     document.body.append(mainDiv, startGameDiv, joinGameDiv);
 }
@@ -118,13 +121,12 @@ function displayHostWaitMenu(roomCode = "MISSING", amountOfPeopleInRoom = 0) {
     numberOfPeopleSpan.id = "numOfPeople";
     numberOfPeopleDiv.appendChild(numberOfPeopleSpan);
 
-    updateAmountOfPeopleInWaitingRoom(amountOfPeopleInRoom);
-
     let gameStartButton = document.createElement("button");
     gameStartButton.innerText = "Start Game!";
     //TODO: Connect to function that sends game start request
 
-    document.body.appendChild(roomCodeDiv, numberOfPeopleDiv, gameStartButton);
+    document.body.append(roomCodeDiv, numberOfPeopleDiv, gameStartButton);
+    updateAmountOfPeopleInWaitingRoom(amountOfPeopleInRoom);
 }
 
 function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
@@ -140,13 +142,15 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
 
     let userNumberDiv = document.createElement("div");
     userNumberDiv.classList.add("testing-textbox");
-    userNumberDiv.appendChild(document.createTextNode("Your room code: " + userNumber));
+    userNumberDiv.appendChild(document.createTextNode("Your player number: " + userNumber + "\n"));
+    let playerImg = document.createElement("img");
+    playerImg.src = "./assets/img/player-icons/" + userNumber + ".png";
 
     let pleaseWaitDiv = document.createElement("div");
     pleaseWaitDiv.classList.add("testing-textbox");
     pleaseWaitDiv.innerHTML = "Please wait for the game to be started by the host!";
 
-    document.body.appendChild(roomCodeDiv, userNumberDiv, pleaseWaitDiv);
+    document.body.append(roomCodeDiv, userNumberDiv, pleaseWaitDiv);
 }
 
 // ----------- UPDATE VISUALS ----------------------
@@ -180,10 +184,11 @@ function sendMessageToSocket(messageType, messageContents = null) {
         "type": messageType
     };
     if (messageContents !== null) {
-        request["contents"] = JSON.stringify(messageContents)
+        request["content"] = messageContents;
     }
 
     socket.send(JSON.stringify(request));
+    console.log("[SENT MESSAGE] " + JSON.stringify(request));
 }
 
 function requestNewGameCreation() {
@@ -202,15 +207,21 @@ function requestGameJoin(gameCode) {
 
 // Ran whenever the websocket sends a message.
 function handleIncomingMessage(event) {
+    if (event.data[0] != '{') {
+        console.log("Recieved non-JSON message. " + event.data);
+        return;
+    }
     let parsedData = JSON.parse(event.data);
 
     if (parsedData["type"] === "StanceSnapshot") {
         // Snapshot! Let's refresh the window!
         handleSnapshotMessage(parsedData);
+        return;
     }
 
     if (parsedData["type"] === "InvalidRequest") {
-        console.log("[ERROR!] Sent malformed request! " + parsedData);
+        console.log("[ERROR!] Sent malformed request! " + JSON.stringify(parsedData));
+        return;
     }
 
     switch (currentScreen) {
@@ -230,7 +241,7 @@ function handleIncomingMessage(event) {
 // Starts a new screen depending on what happened.
 function handleSnapshotMessage(data) {
     if (!data["content"]) {
-        console.log("[ERROR!] Snapshot missing content: " + data);
+        console.log("[ERROR!] Snapshot missing content: " + JSON.stringify(data));
         return;
     }
     switch(data["content"]["phase"]) {
@@ -243,14 +254,14 @@ function handleSnapshotMessage(data) {
             break;
 
         default: 
-            console.log("[ERROR!] Invalid snapshot phase: " + data);
+            console.log("[ERROR!] Invalid snapshot phase: " + JSON.stringify(data));
     }
 }
 
 function mainMenuIncomingMessages(data) {
     switch (data["type"]) {
         default:
-            console.log("[ERROR!] Invalid message type recieved for main menu: " + data);
+            console.log("[ERROR!] Invalid message type recieved for main menu: " + JSON.stringify(data));
     }
 }
 
@@ -259,18 +270,18 @@ function hostWaitMenuIncomingMessages(data) {
         case "GameUpdate":
             switch(data["content"]["event"]) {
                 case "playerJoin":
-                    updateAmountOfPeopleInWaitingRoom(data["content"]["playerNum"]);
+                    updateAmountOfPeopleInWaitingRoom(data["content"]["totalPlayers"]);
                     break;
 
                 default:
-                    console.log("[ERROR!] Recieved an invalid event for game data! " + data);
+                    console.log("[ERROR!] Recieved an invalid event for game data! " + JSON.stringify(data));
                     break;
             }
             break;
 
 
         default:
-            console.log("[ERROR!] Invalid message type recieved for host wait menu: " + data);
+            console.log("[ERROR!] Invalid message type recieved for host wait menu: " + JSON.stringify(data));
     }
 }
 

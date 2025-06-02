@@ -122,11 +122,11 @@ public class SessionManager
         }
 
         var buffer = new byte[1024];
-        GameInfo? gameUserIsConnectedTo = null;
 
         while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
         {
             var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+            GameInfo? gameConnectedTo = null;
 
             if (result.MessageType == WebSocketMessageType.Close)
             {
@@ -141,35 +141,40 @@ public class SessionManager
             switch (incomingClientMessage.messageType)
             {
                 case IncomingGameMessage.MessageType.CreateGame:
-                    if (gameUserIsConnectedTo != null)
+                    if (gameConnectedTo != null)
                     {
                         // User is in a game.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
                         break;
                     }
-                    gameUserIsConnectedTo = StartNewGame(socket, token);
-                    await gameUserIsConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
+                    gameConnectedTo = StartNewGame(socket, token);
+                    await gameConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
                     break;
 
                 case IncomingGameMessage.MessageType.ConnectToGame:
-                    if (gameUserIsConnectedTo != null)
+                    if (gameConnectedTo != null)
                     {
                         // User is in a game.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot join a game while already in one."));
                         break;
                     }
-                    // TODO: Put player limit for games?
                     if (incomingClientMessage.messageContent is null || !gameSessions.ContainsKey(incomingClientMessage.messageContent["gameCode"]))
                     {
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Requested invalid room code."));
                         break;
                     }
                     GameInfo requestedGame = gameSessions[incomingClientMessage.messageContent["gameCode"]];
-                    await requestedGame.Game.addNewPlayer(socket, token); 
+                    if (requestedGame.Game!.playerList.Count >= Game.MAX_PLAYERS)
+                    {
+                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Game is full!"));
+                        break;
+                    }
+                    await requestedGame.Game.addNewPlayer(socket, token);
+                    gameConnectedTo = requestedGame;
                     break;
 
                 case IncomingGameMessage.MessageType.GameAction:
-                    if (gameUserIsConnectedTo == null)
+                    if (gameConnectedTo == null)
                     {
                         // User is not connected.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot take a game action without being in a game."));
@@ -178,12 +183,16 @@ public class SessionManager
                     // TODO: Handle case
                     break;
 
-                default: 
+                default:
                     await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Invalid request type recieved."));
                     Console.WriteLine("[SessionManager] Recieved invalid request type.");
                     break;
             }
         }
+
+        // CONNECTION CLOSED!
+        
+        //TODO: Handle host leaving game!
     }
 
     static async Task SendMessageOverSocket(WebSocket socket, CancellationToken token,  OutgoingGameMessage message)

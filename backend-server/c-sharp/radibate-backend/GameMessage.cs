@@ -2,6 +2,8 @@ using System;
 using System.Net.WebSockets;
 using System.Security;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace radibate_backend;
 
@@ -32,23 +34,30 @@ public class IncomingGameMessage
 
     public static IncomingGameMessage ParseIncomingRequest(string message, WebSocket? websocket = null)
     {
-        // TODO: Handle invalid JSON messages.
-        var deserializedMessage = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
+        using var document = JsonDocument.Parse(message);
+        var root = document.RootElement;
 
-        if (deserializedMessage == null) throw new NullReferenceException("Incoming message converted to null - " + message);
-        if (!deserializedMessage.ContainsKey("type")) throw new ArgumentException("Incoming message missing type key - " + message);
-        MessageType parsedType;
-        if (!Enum.TryParse(deserializedMessage["type"], out parsedType)) throw new ArgumentException("Invalid type key - " + message);
+        if (!root.TryGetProperty("type", out var typeElement))
+            throw new ArgumentException("Incoming message missing type key - " + message);
+
+        if (!Enum.TryParse(typeElement.GetString(), out MessageType parsedType))
+            throw new ArgumentException("Invalid type key - " + message);
 
         Dictionary<string, string>? messageContent = null;
-        if (deserializedMessage.ContainsKey("content"))
+
+        if (root.TryGetProperty("content", out var contentElement) && contentElement.ValueKind == JsonValueKind.Object)
         {
-            // TODO: Handle invalid JSON content.
-            messageContent = JsonSerializer.Deserialize<Dictionary<string, string>>(deserializedMessage["content"]);
+            messageContent = new Dictionary<string, string>();
+
+            foreach (var prop in contentElement.EnumerateObject())
+            {
+                messageContent[prop.Name] = prop.Value.GetString() ?? "";
+            }
         }
 
         return new IncomingGameMessage(parsedType, messageContent, websocket);
     }
+
 }
 
 public class OutgoingGameMessage
