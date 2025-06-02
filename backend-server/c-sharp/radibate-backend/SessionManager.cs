@@ -122,11 +122,11 @@ public class SessionManager
         }
 
         var buffer = new byte[1024];
+        GameInfo? gameConnectedTo = null;
 
         while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
         {
             var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-            GameInfo? gameConnectedTo = null;
 
             if (result.MessageType == WebSocketMessageType.Close)
             {
@@ -191,8 +191,21 @@ public class SessionManager
         }
 
         // CONNECTION CLOSED!
+
+        if (gameConnectedTo != null && gameConnectedTo.Game != null) {
+            // Notify that someone left!
+            if (gameConnectedTo.Game.hostSocket == socket)
+            {
+                //TODO: Handle host leaving game!
+            }
+            else
+            {
+                await gameConnectedTo.Game.disconnectPlayer(socket);
+            }
+        }
         
-        //TODO: Handle host leaving game!
+        
+        
     }
 
     static async Task SendMessageOverSocket(WebSocket socket, CancellationToken token,  OutgoingGameMessage message)

@@ -143,8 +143,12 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
     let userNumberDiv = document.createElement("div");
     userNumberDiv.classList.add("testing-textbox");
     userNumberDiv.appendChild(document.createTextNode("Your player number: " + userNumber + "\n"));
+    userNumberDiv.appendChild(document.createElement("br"));
+    userNumberDiv.appendChild(document.createElement("br"));
     let playerImg = document.createElement("img");
     playerImg.src = "./assets/img/player-icons/" + userNumber + ".png";
+    playerImg.classList.add("character-icon");
+    userNumberDiv.appendChild(playerImg);   
 
     let pleaseWaitDiv = document.createElement("div");
     pleaseWaitDiv.classList.add("testing-textbox");
@@ -269,6 +273,7 @@ function hostWaitMenuIncomingMessages(data) {
     switch (data["type"]) {
         case "GameUpdate":
             switch(data["content"]["event"]) {
+                case "playerLeft":
                 case "playerJoin":
                     updateAmountOfPeopleInWaitingRoom(data["content"]["totalPlayers"]);
                     break;

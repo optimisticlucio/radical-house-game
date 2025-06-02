@@ -55,11 +55,11 @@ body {
 
 .ongoing-debate-host .player-stance > .supporters {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 4ch);
+    grid-template-columns: repeat(auto-fill, 5ch);
     gap: 0.5ch;
 }
 
 .character-icon {
-    max-width: 4ch;
-    max-height: 4ch;
+    max-width: 5ch;
+    max-height: 5ch;
 }

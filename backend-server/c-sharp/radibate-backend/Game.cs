@@ -47,7 +47,30 @@ public class Game
                 });
         await SendMessageToHost(notifyAboutNewPlayer);
         await newPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, currentGamePhase.GenerateGameSnapshot(newPlayer)));
-    } 
+    }
+
+    // Removes the player with the given socket from the game.
+    public async Task disconnectPlayer(WebSocket playerSocket)
+    {
+        Player? player = GetPlayer(playerSocket);
+        if (player == null)
+        {
+            Console.WriteLine("[ERROR!] Tried disconnecting a player who's not in the game. ");
+            return;
+        }
+        playerList.Remove(player);
+        
+        OutgoingGameMessage notifyAboutPlayerLeaving = new OutgoingGameMessage(
+                OutgoingGameMessage.MessageType.GameUpdate,
+                new Dictionary<string, string>()
+                {
+                {"event", "playerLeft"},
+                {"username", player.username},
+                {"playerNum", player.playerNumber.ToString()},
+                {"totalPlayers", playerList.Count.ToString()}
+                });
+        await SendMessageToHost(notifyAboutPlayerLeaving);
+    }
 
     public Player? GetPlayer(WebSocket targetWebSocket)
     {
