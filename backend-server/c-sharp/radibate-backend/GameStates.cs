@@ -64,6 +64,7 @@ public abstract class GameState
 
             if (requestingPlayer == null)
             { // Host
+                gameSnapshot["phase"] = "hostWaitingRoom";
                 gameSnapshot["playerAmount"] = parentGame.playerList.Count.ToString();
             }
             else

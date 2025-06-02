@@ -145,8 +145,7 @@ public class SessionManager
                     {
                         // User is in a game.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
-
-                        continue;
+                        break;
                     }
                     gameUserIsConnectedTo = StartNewGame(socket, token);
                     await gameUserIsConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
@@ -157,9 +156,16 @@ public class SessionManager
                     {
                         // User is in a game.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot join a game while already in one."));
-                        continue;
+                        break;
                     }
-                    // TODO: Handle case
+                    // TODO: Put player limit for games?
+                    if (incomingClientMessage.messageContent is null || !gameSessions.ContainsKey(incomingClientMessage.messageContent["gameCode"]))
+                    {
+                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Requested invalid room code."));
+                        break;
+                    }
+                    GameInfo requestedGame = gameSessions[incomingClientMessage.messageContent["gameCode"]];
+                    await requestedGame.Game.addNewPlayer(socket, token); 
                     break;
 
                 case IncomingGameMessage.MessageType.GameAction:
@@ -167,7 +173,7 @@ public class SessionManager
                     {
                         // User is not connected.
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot take a game action without being in a game."));
-                        continue;
+                        break;
                     }
                     // TODO: Handle case
                     break;

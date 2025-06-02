@@ -21,6 +21,23 @@ public class Game
         this.roomCode = roomCode;
     }
 
+    public async Task addNewPlayer(WebSocket newPlayerSocket, CancellationToken newPlayerToken)
+    {
+        Player newPlayer = new Player("USERNAMES_NOT_HANDLED_YET", newPlayerSocket, newPlayerToken);
+        playerList.Add(newPlayer);
+
+        OutgoingGameMessage notifyAboutNewPlayer = new OutgoingGameMessage(
+            OutgoingGameMessage.MessageType.GameUpdate,
+            new Dictionary<string, string>()
+            {
+                {"event", "playerJoin"},
+                {"username", newPlayer.username},
+                {"playerNum", newPlayer.playerNumber.ToString()},
+                {"totalPlayers", playerList.Count.ToString()}
+            });
+        await SendMessageToHost(notifyAboutNewPlayer);
+    } 
+
     public Player? GetPlayer(WebSocket targetWebSocket)
     {
         return playerList.Find(x => x.webSocket == targetWebSocket);
@@ -53,12 +70,12 @@ public class Game
         public int currentScore = 0;
         public int playerNumber = -1;
         public WebSocket? webSocket;
-
         public CancellationToken? token;
-
-        public Player(string username)
+        public Player(string username, WebSocket webSocket, CancellationToken cancellationToken)
         {
             this.username = username;
+            this.webSocket = webSocket;
+            this.token = cancellationToken;
         }
 
         public async Task SendMessage(OutgoingGameMessage message)

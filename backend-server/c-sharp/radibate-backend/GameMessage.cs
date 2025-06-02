@@ -71,7 +71,8 @@ public class OutgoingGameMessage
         InvalidRequest, // Sent back if the user gave an illogical request.
         ConnectedAsHost, // Sent to confirm a game has been created by user request, and tells them the room code.
         ConnectedToGame,  // Sent to confirm the user has connected to a room.
-        StanceSnapshot  // A snapshot of the current game state to make sure everyone's onboard.
+        StanceSnapshot,  // A snapshot of the current game state to make sure everyone's onboard.
+        GameUpdate // A specific update of an individual state change. Assumes the client knows the current state.
     }
 
     public override string ToString()

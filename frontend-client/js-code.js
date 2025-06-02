@@ -60,6 +60,8 @@ function setupTimers() {
     }  
 }
 
+// ----------- SWITCH SCREENS ---------------
+
 function serverDeadNotification() {
     currentScreen = "serverDead";
     document.body.innerHTML = '';
@@ -98,6 +100,61 @@ function displayMainMenu() {
     document.body.append(mainDiv, startGameDiv, joinGameDiv);
 }
 
+function displayHostWaitMenu(roomCode = "MISSING", amountOfPeopleInRoom = 0) {
+    currentScreen = "hostWaitMenu";
+    document.body.innerHTML = '';
+
+    let roomCodeDiv = document.createElement("div");
+    roomCodeDiv.classList.add("testing-textbox");
+    let roomCodeText = document.createElement("h2");
+    roomCodeText.innerText = roomCode;
+    roomCodeDiv.appendChild(document.createTextNode("ROOM CODE:"));
+    roomCodeDiv.appendChild(roomCodeText);
+
+    let numberOfPeopleDiv = document.createElement("div");
+    numberOfPeopleDiv.classList.add("testing-textbox");
+    numberOfPeopleDiv.appendChild(document.createTextNode("Number of people in room: "));
+    let numberOfPeopleSpan = document.createElement("span");
+    numberOfPeopleSpan.id = "numOfPeople";
+    numberOfPeopleDiv.appendChild(numberOfPeopleSpan);
+
+    updateAmountOfPeopleInWaitingRoom(amountOfPeopleInRoom);
+
+    let gameStartButton = document.createElement("button");
+    gameStartButton.innerText = "Start Game!";
+    //TODO: Connect to function that sends game start request
+
+    document.body.appendChild(roomCodeDiv, numberOfPeopleDiv, gameStartButton);
+}
+
+function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
+    currentScreen = "waitMenu";
+    document.body.innerHTML = '';
+
+    let roomCodeDiv = document.createElement("div");
+    roomCodeDiv.classList.add("testing-textbox");
+    let roomCodeText = document.createElement("h2");
+    roomCodeText.innerText = roomCode;
+    roomCodeDiv.appendChild(document.createTextNode("Connected successfully to room number:"));
+    roomCodeDiv.appendChild(roomCodeText);
+
+    let userNumberDiv = document.createElement("div");
+    userNumberDiv.classList.add("testing-textbox");
+    userNumberDiv.appendChild(document.createTextNode("Your room code: " + userNumber));
+
+    let pleaseWaitDiv = document.createElement("div");
+    pleaseWaitDiv.classList.add("testing-textbox");
+    pleaseWaitDiv.innerHTML = "Please wait for the game to be started by the host!";
+
+    document.body.appendChild(roomCodeDiv, userNumberDiv, pleaseWaitDiv);
+}
+
+// ----------- UPDATE VISUALS ----------------------
+
+function updateAmountOfPeopleInWaitingRoom(number = -1) {
+    document.getElementById("numOfPeople").innerText = number;
+}
+
 // ----------- SERVER COMMUNICATION --------------------
 
 function performHandshake() {
@@ -129,12 +186,6 @@ function sendMessageToSocket(messageType, messageContents = null) {
     socket.send(JSON.stringify(request));
 }
 
-// Ran whenever the websocket sends a message.
-function handleIncomingMessage(event) {
-    
-}
-
-
 function requestNewGameCreation() {
     sendMessageToSocket("CreateGame");
 }
@@ -146,3 +197,81 @@ function requestGameJoin(gameCode) {
 
     sendMessageToSocket("ConnectToGame", messageData);
 }
+
+// ---------- HANDLE INCOMING MESSAGES -----------------
+
+// Ran whenever the websocket sends a message.
+function handleIncomingMessage(event) {
+    let parsedData = JSON.parse(event.data);
+
+    if (parsedData["type"] === "StanceSnapshot") {
+        // Snapshot! Let's refresh the window!
+        handleSnapshotMessage(parsedData);
+    }
+
+    if (parsedData["type"] === "InvalidRequest") {
+        console.log("[ERROR!] Sent malformed request! " + parsedData);
+    }
+
+    switch (currentScreen) {
+        case "mainMenu":
+            mainMenuIncomingMessages(parsedData);
+            break;
+        
+        case "hostWaitMenu":
+            hostWaitMenuIncomingMessages(parsedData);
+            break;
+
+        default:
+            console.log("[ERROR!] Current screen is set to: " + currentScreen +". Not a valid screen! Incoming message discarded as a result.");
+    }
+}
+
+// Starts a new screen depending on what happened.
+function handleSnapshotMessage(data) {
+    if (!data["content"]) {
+        console.log("[ERROR!] Snapshot missing content: " + data);
+        return;
+    }
+    switch(data["content"]["phase"]) {
+        case "hostWaitingRoom":
+            displayHostWaitMenu(data["content"]["code"], data["content"]["playerAmount"]);
+            break;
+        
+        case "waitingRoom":
+            displayPlayerWaitMenu(data["content"]["code"], data["content"]["playerNumber"]);
+            break;
+
+        default: 
+            console.log("[ERROR!] Invalid snapshot phase: " + data);
+    }
+}
+
+function mainMenuIncomingMessages(data) {
+    switch (data["type"]) {
+        default:
+            console.log("[ERROR!] Invalid message type recieved for main menu: " + data);
+    }
+}
+
+function hostWaitMenuIncomingMessages(data) {
+    switch (data["type"]) {
+        case "GameUpdate":
+            switch(data["content"]["event"]) {
+                case "playerJoin":
+                    updateAmountOfPeopleInWaitingRoom(data["content"]["playerNum"]);
+                    break;
+
+                default:
+                    console.log("[ERROR!] Recieved an invalid event for game data! " + data);
+                    break;
+            }
+            break;
+
+
+        default:
+            console.log("[ERROR!] Invalid message type recieved for host wait menu: " + data);
+    }
+}
+
+
