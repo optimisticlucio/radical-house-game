@@ -82,7 +82,24 @@ public abstract class GameState
 
         public override Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {
-            throw new NotImplementedException();
+            switch (incomingMessage.messageType)
+            {
+                case IncomingGameMessage.MessageType.GameAction:
+                    if (incomingMessage.requestingSocket == parentGame.hostSocket)
+                    {
+                        _ = parentGame.PlayRenardEdition();
+                    }
+                    else
+                    {
+                        Console.WriteLine("[GAME ERROR] Recieved game action during PlayerWaiting phase from a non-host!");
+                    }
+                    break;
+                default:
+                    Console.WriteLine("[GAME ERROR] Recieved incoming message during PlayerWaiting phase with invalid type!");
+                    break;
+            }
+            
+            return Task.CompletedTask;
         }
     }
 
@@ -107,9 +124,10 @@ public abstract class GameState
             await publicDiscussion;
         }
 
-        public override async Task End()
+        public override Task End()
         {
             // TODO
+            return Task.CompletedTask;
         }
 
         public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
@@ -157,9 +175,10 @@ public abstract class GameState
             await countdownEnded;
         }
 
-        public override async Task End()
+        public override Task End()
         {
-            // TODO - Package the player info nice and neat for someone to get later.
+            // TODO: Package the player info nice and neat for someone to get later.
+            return Task.CompletedTask;
         }
 
         public static string GetRandomDebateTopic()
@@ -203,7 +222,7 @@ public abstract class GameState
             }
         }
 
-        private async Task takeGameAction(Dictionary<string, string> action, Game.Player actingPlayer)
+        private Task takeGameAction(Dictionary<string, string> action, Game.Player actingPlayer)
         {
             switch (action["action"])
             {
@@ -223,6 +242,8 @@ public abstract class GameState
                     Console.WriteLine("[GAME] Recieved GameAction with invalid action field.");
                     break;
             }
+
+            return Task.CompletedTask;
         }
 
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
@@ -293,7 +314,7 @@ public abstract class GameState
             await countdownEnded;
         }
 
-        public override async Task End()
+        public override Task End()
         {
             // Gives each debater a score relative to the people who agreed with them.
             int[] finalScores = new int[debaters.Length];
@@ -310,9 +331,11 @@ public abstract class GameState
             {
                 debaters[i].currentScore += finalScores[i];
             }
+
+            return Task.CompletedTask;
         }
 
-        public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
+        public override Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {
             switch (incomingMessage.messageType)
             {
@@ -326,6 +349,8 @@ public abstract class GameState
                     Console.WriteLine("[GAME] Client message invalid during StanceTakingPhase.");
                     break;
             }
+
+            return Task.CompletedTask;
         }
 
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
@@ -414,7 +439,7 @@ public abstract class GameState
             throw new NotImplementedException();
         }
 
-        public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
+        public override Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {
             if (incomingMessage.requestingSocket != parentGame.hostSocket)
             {
@@ -424,6 +449,8 @@ public abstract class GameState
             {
                 // TODO: Handle requesting a new game.
             }
+
+            return Task.CompletedTask;
         }
     }
 }

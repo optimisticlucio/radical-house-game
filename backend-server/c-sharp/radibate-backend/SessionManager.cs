@@ -137,7 +137,7 @@ public class SessionManager
             string msg = Encoding.UTF8.GetString(buffer, 0, result.Count).Trim();
             Console.WriteLine($"[Game] Received message: {msg}");
 
-            IncomingGameMessage incomingClientMessage = IncomingGameMessage.ParseIncomingRequest(msg);
+            IncomingGameMessage incomingClientMessage = IncomingGameMessage.ParseIncomingRequest(msg, socket);
             switch (incomingClientMessage.messageType)
             {
                 case IncomingGameMessage.MessageType.CreateGame:

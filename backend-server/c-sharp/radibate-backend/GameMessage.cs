@@ -15,9 +15,9 @@ public class IncomingGameMessage
 
     public MessageType messageType;
     public Dictionary<string, string>? messageContent;
-    public WebSocket? requestingSocket;
+    public WebSocket requestingSocket;
 
-    public IncomingGameMessage(MessageType messageType, Dictionary<string, string>? messageContent = null, WebSocket? websocket = null)
+    public IncomingGameMessage(MessageType messageType, WebSocket websocket,Dictionary<string, string>? messageContent = null)
     {
         this.messageType = messageType;
         this.messageContent = messageContent;
@@ -32,7 +32,7 @@ public class IncomingGameMessage
         RequestStateInfo // Client requests snapshot of the current game state.
     }
 
-    public static IncomingGameMessage ParseIncomingRequest(string message, WebSocket? websocket = null)
+    public static IncomingGameMessage ParseIncomingRequest(string message, WebSocket websocket)
     {
         using var document = JsonDocument.Parse(message);
         var root = document.RootElement;
@@ -55,7 +55,7 @@ public class IncomingGameMessage
             }
         }
 
-        return new IncomingGameMessage(parsedType, messageContent, websocket);
+        return new IncomingGameMessage(parsedType, websocket, messageContent);
     }
 
 }

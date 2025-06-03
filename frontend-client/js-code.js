@@ -342,6 +342,13 @@ function requestGameJoin(gameCode) {
     sendMessageToSocket("ConnectToGame", messageData);
 }
 
+function requestGameStart() {
+    sendMessageToSocket("GameAction", {
+        "action": "startGame"
+    });
+
+}
+
 // ---------- HANDLE INCOMING MESSAGES -----------------
 
 // Ran whenever the websocket sends a message.
