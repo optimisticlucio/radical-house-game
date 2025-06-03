@@ -82,11 +82,13 @@ public abstract class GameState
 
         public override Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {
+            Console.WriteLine("[PHASE] Message recieved by AwaitingPlayersPhase!");
             switch (incomingMessage.messageType)
             {
                 case IncomingGameMessage.MessageType.GameAction:
                     if (incomingMessage.requestingSocket == parentGame.hostSocket)
                     {
+                        Console.WriteLine("[GAME] Starting game...");
                         _ = parentGame.PlayRenardEdition();
                     }
                     else
@@ -109,9 +111,11 @@ public abstract class GameState
         private PublicDiscussionPhase? publicDiscussionPhase;
         public override async Task PlayPhase()
         {
+            Console.WriteLine("[GAME] Setting up stancetaking phase...");
             stanceTakingPhase = new StanceTakingPhase(parentGame, parentGame.playerList);
             await stanceTakingPhase.PlayPhase();
 
+            Console.WriteLine("[GAME] Setting up discussion phase...");
             publicDiscussionPhase = new PublicDiscussionPhase(parentGame);
             publicDiscussionPhase.setDiscussionTopic(stanceTakingPhase.discussionTopic);
             for (int i = 0; i < stanceTakingPhase.debaters.Length; i++)
@@ -158,17 +162,22 @@ public abstract class GameState
             playersToPickFrom = [.. playersToPickFrom]; // Shallow clone.
             playersToPickFrom.Shuffle();
 
+            Console.WriteLine("[DEBUG] Number of players in stancetaking phase is {0}", playersToPickFrom.Count);
+
             for (int i = 0; i < debaters.Length; i++)
             {
                 debaters[i] = playersToPickFrom[i];
             }
 
+            Console.WriteLine("[DEBUG] Selecting debate topic...");
             discussionTopic = GetRandomDebateTopic();
+            Console.WriteLine("[DEBUG] Debate topic is: ", discussionTopic);
         }
 
         public async override Task PlayPhase()
         {
             Task countdownEnded = countdownTimer.StartAsync();
+            Console.WriteLine($"[PHASE] Activated StanceTaking phase! Debaters are players: {string.Join(", ", debaters.Select(d => d.playerNumber))}");
 
             _ = SendSnapshotToAllPlayers();
 
@@ -183,10 +192,35 @@ public abstract class GameState
 
         public static string GetRandomDebateTopic()
         {
-            string[] allQuestions = File.ReadAllLines("/assets/questions.txt");
+            string filePath = "/assets/questions.txt";
 
-            return allQuestions[Utils.rng.Next(allQuestions.Length)];
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    Console.WriteLine($"[ERROR] Debate topic file not found at: {filePath}");
+                    return "ERROR: No topic file found.";
+                }
+
+                string[] allQuestions = File.ReadAllLines(filePath);
+
+                if (allQuestions.Length == 0)
+                {
+                    Console.WriteLine($"[ERROR] Debate topic file at {filePath} is empty.");
+                    return "ERROR: No topics available.";
+                }
+
+                string topic = allQuestions[Utils.rng.Next(allQuestions.Length)];
+                Console.WriteLine($"[DEBUG] Selected topic: \"{topic}\"");
+                return topic;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EXCEPTION] Failed to get debate topic: {ex.Message}");
+                return "ERROR: Exception occurred while getting topic.";
+            }
         }
+
 
         public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {

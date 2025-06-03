@@ -141,7 +141,7 @@ function displayHostWaitMenu(roomCode = "MISSING", amountOfPeopleInRoom = 0) {
 
     let gameStartButton = document.createElement("button");
     gameStartButton.innerText = "Start Game!";
-    //TODO: Connect to function that sends game start request
+    gameStartButton.onclick = requestGameStart;
 
     document.body.append(roomCodeDiv, numberOfPeopleDiv, gameStartButton);
     updateAmountOfPeopleInWaitingRoom(amountOfPeopleInRoom);

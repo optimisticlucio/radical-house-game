@@ -80,15 +80,18 @@ public class Game
 
     public async Task SendMessageToHost(OutgoingGameMessage message)
     {
+        Console.WriteLine("[GAME] Sending message to host: {0}", message);
         await hostSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.ToString())), WebSocketMessageType.Text, true, hostCancellationToken);
     }
 
     public async Task PlayRenardEdition()
     {
         const int TOTAL_ROUNDS = 1;
+        Console.WriteLine("[PHASE] RenardEdition Started!");
 
         for (currentRoundNumber = 1; currentRoundNumber <= TOTAL_ROUNDS; currentRoundNumber++)
         {
+            Console.WriteLine("[RENARDGAME] Starting Round {0}!", currentRoundNumber);
             currentGamePhase = new GameState.RenardRadicalRound(this);
             await currentGamePhase.Act();
         }
@@ -121,6 +124,7 @@ public class Game
             }
             else
             {
+                Console.WriteLine("[Player] Sending message to player: {0}", message);
                 await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.ToString())), WebSocketMessageType.Text, true, token ?? CancellationToken.None);
             }
         }

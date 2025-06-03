@@ -180,7 +180,8 @@ public class SessionManager
                         await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot take a game action without being in a game."));
                         break;
                     }
-                    // TODO: Handle case
+
+                    _ = gameConnectedTo.Game!.currentGamePhase.RecievePlayerMessage(incomingClientMessage);
                     break;
 
                 default:
