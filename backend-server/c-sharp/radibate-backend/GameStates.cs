@@ -397,10 +397,12 @@ public abstract class GameState
 
             if (requestingPlayer != null)
             {
+                gameSnapshot["type"] = "player";
                 // TODO: Handle data for players.
             }
             else
             {
+                gameSnapshot["type"] = "host";
                 // TODO: Handle data for host.
             }
 

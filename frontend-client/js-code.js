@@ -265,6 +265,33 @@ function displayPlayerDebateScreen() {
     document.body.append(youNextDiv);
 }
 
+function displayHostLeaderboard() {
+    currentScreen = "hostLeaderboard";
+    document.body.innerHTML = '';
+
+    // TODO: Implement.
+
+    let youNextDiv = document.createElement("div");
+    youNextDiv.classList.add("testing-textbox");
+    youNextDiv.innerHTML = "Game's Over! Someone won! I really gotta set this up.";
+
+    document.body.append(youNextDiv);
+}
+
+function displayPlayerLeaderboard() {
+    currentScreen = "playerLeaderboard";
+    document.body.innerHTML = '';
+
+    // TODO: Implement.
+    
+
+    let youNextDiv = document.createElement("div");
+    youNextDiv.classList.add("testing-textbox");
+    youNextDiv.innerHTML = "Game's over, go to bed.";
+
+    document.body.append(youNextDiv);
+}
+
 // ----------- UPDATE VISUALS ----------------------
 
 function updateAmountOfPeopleInWaitingRoom(number = -1) {
@@ -389,6 +416,15 @@ function handleSnapshotMessage(data) {
             }
             else { // type should be "pickingPlayer"
                 displayPlayerDebateScreen();
+            }
+            break;
+
+        case "gameEnd":
+            if (data["content"]["type"] == "host") {
+                displayHostLeaderboard();
+            }
+            else {
+                displayPlayerLeaderboard();
             }
             break;
 
