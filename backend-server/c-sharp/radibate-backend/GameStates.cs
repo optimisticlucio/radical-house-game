@@ -192,7 +192,10 @@ public abstract class GameState
 
         public static string GetRandomDebateTopic()
         {
-            string filePath = "assets/questions.txt";
+            // Resolve the path relative to the application base directory
+            string filePath = Path.Combine(AppContext.BaseDirectory, "assets", "questions.txt");
+
+            Console.WriteLine($"[DEBUG] Attempting to read topic file from: {filePath}");
 
             try
             {
@@ -216,11 +219,10 @@ public abstract class GameState
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[EXCEPTION] Failed to get debate topic: {ex.Message}");
+                Console.WriteLine($"[EXCEPTION] Failed to get debate topic from {filePath}: {ex.Message}");
                 return "ERROR: Exception occurred while getting topic.";
             }
         }
-
 
         public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {
@@ -268,8 +270,10 @@ public abstract class GameState
                         break;
                     }
                     positions[playerSpot] = action["stance"];
-                    // TODO: Check if all players inputted stance? Send message that a player inputted stance?
 
+                    // TODO: Check if all players inputted stance? 
+                    // Should I do a better message for this?
+                    _ = actingPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(actingPlayer)));
                     break;
 
                 default:
@@ -296,12 +300,13 @@ public abstract class GameState
             else if (debaters.Contains(requestingPlayer))
             {
                 // Debater
-                if (positions[Array.IndexOf(debaters, requestingPlayer)] == string.Empty)
+                if (string.IsNullOrWhiteSpace(positions[Array.IndexOf(debaters, requestingPlayer)]))
                 {
                     gameSnapshot["type"] = "debaterStanceMissing";
                 }
                 else
                 {
+                    Console.WriteLine("[DEBUG] Position of player is - [" + positions[Array.IndexOf(debaters, requestingPlayer)] + "]");
                     gameSnapshot["type"] = "debaterStanceGiven";
                 }
                 gameSnapshot["question"] = discussionTopic;

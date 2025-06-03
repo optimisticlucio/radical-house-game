@@ -404,13 +404,13 @@ function handleSnapshotMessage(data) {
                 displayHostStanceTakingScreen(data["content"]["debaters"].split(","), data["content"]["secondsLeft"]);
             }
             else if (data["content"]["type"] == "debaterStanceMissing") {
-                displayDebaterDebateScreen();
+                displayPlayerTakeStanceScreen(data["content"]["question"]);
             }
             else if (data["content"]["type"] == "debaterStanceGiven") {
-
+                displayPlayerWaitStanceScreen();
             }
             else { // type should be "pickingPlayer"
-                displayPlayerDebateScreen();
+                displayPlayerWaitStanceScreen();
             }
             break;
         
