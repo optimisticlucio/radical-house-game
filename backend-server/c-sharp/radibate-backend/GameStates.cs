@@ -291,7 +291,7 @@ public abstract class GameState
             {
                 // Host message
                 gameSnapshot["type"] = "host";
-                gameSnapshot["debaters"] = String.Join(",", debaters.Select(n => n.ToString()));
+                gameSnapshot["debaters"] = String.Join(",", debaters.Select(n => n.playerNumber.ToString()));
             }
             else if (debaters.Contains(requestingPlayer))
             {
