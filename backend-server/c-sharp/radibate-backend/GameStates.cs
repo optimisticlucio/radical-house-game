@@ -192,7 +192,7 @@ public abstract class GameState
 
         public static string GetRandomDebateTopic()
         {
-            string filePath = "/assets/questions.txt";
+            string filePath = "assets/questions.txt";
 
             try
             {
