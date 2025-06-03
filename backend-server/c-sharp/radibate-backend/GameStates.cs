@@ -227,7 +227,37 @@ public abstract class GameState
 
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)
         {
-            return null; // TODO
+            Dictionary<string, string> gameSnapshot = new Dictionary<string, string>();
+            gameSnapshot["phase"] = "stanceTaking";
+            gameSnapshot["type"] = "InvalidSnapshot"; // If this gets sent to the user something very wrong has occured.
+            gameSnapshot["secondsLeft"] = countdownTimer.GetRemainingSeconds().ToString();
+
+            if (requestingPlayer == null)
+            {
+                // Host message
+                gameSnapshot["type"] = "host";
+                gameSnapshot["debaters"] = String.Join(",", debaters.Select(n => n.ToString()));
+            }
+            else if (debaters.Contains(requestingPlayer))
+            {
+                // Debater
+                if (positions[Array.IndexOf(debaters, requestingPlayer)] == string.Empty)
+                {
+                    gameSnapshot["type"] = "debaterStanceMissing";
+                }
+                else
+                {
+                    gameSnapshot["type"] = "debaterStanceGiven";
+                }
+                gameSnapshot["question"] = discussionTopic;
+            }
+            else
+            {
+                // Random player
+                gameSnapshot["type"] = "pickingPlayer";
+            }
+
+            return gameSnapshot;
         }
     }
 

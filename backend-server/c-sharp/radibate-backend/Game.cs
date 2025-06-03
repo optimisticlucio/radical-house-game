@@ -11,6 +11,7 @@ public class Game
     public CancellationToken hostCancellationToken;
     public List<Player> playerList = [];
     public GameState currentGamePhase;
+    public int currentRoundNumber = -1;
 
     public string roomCode;
 
@@ -86,7 +87,7 @@ public class Game
     {
         const int TOTAL_ROUNDS = 1;
 
-        for (int i = 0; i < TOTAL_ROUNDS; i++)
+        for (currentRoundNumber = 1; currentRoundNumber <= TOTAL_ROUNDS; currentRoundNumber++)
         {
             currentGamePhase = new GameState.RenardRadicalRound(this);
             await currentGamePhase.Act();

@@ -42,7 +42,7 @@ socket.addEventListener("close", (event) => {
 // ---------------- FRONTEND ------------------------
 
 // Initializes a countdown script for all timers in the current DOM.
-function setupTimers() {
+function activateTimers() {
     function timerDecrementation(timer) {
         let currentTime = parseInt(timer.innerHTML, 10);
         if (currentTime > 0) {
@@ -58,6 +58,24 @@ function setupTimers() {
             timer.dataset.timer_set = true;
         }
     }  
+}
+
+// Returns an img that displays the icon of a certain player
+function getPlayerImg(playerNumber) {
+    let playerImg = document.createElement("img");
+    playerImg.src = "./assets/img/player-icons/" + playerNumber + ".png";
+    playerImg.classList.add("character-icon");
+
+    return playerImg;
+}
+
+// Returns a timer with a certain amount of seconds left in it. You need to run activateTimers after!
+function getTimer(seconds) {
+    let newTimer = document.createElement("div");
+    newTimer.classList.add("testing-textbox");
+    newTimer.classList.add("timer");
+    newTimer.innerHTML = seconds;
+    return newTimer;
 }
 
 // ----------- SWITCH SCREENS ---------------
@@ -145,9 +163,7 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
     userNumberDiv.appendChild(document.createTextNode("Your player number: " + userNumber + "\n"));
     userNumberDiv.appendChild(document.createElement("br"));
     userNumberDiv.appendChild(document.createElement("br"));
-    let playerImg = document.createElement("img");
-    playerImg.src = "./assets/img/player-icons/" + userNumber + ".png";
-    playerImg.classList.add("character-icon");
+    let playerImg = getPlayerImg(userNumber);
     userNumberDiv.appendChild(playerImg);   
 
     let pleaseWaitDiv = document.createElement("div");
@@ -155,6 +171,98 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
     pleaseWaitDiv.innerHTML = "Please wait for the game to be started by the host!";
 
     document.body.append(roomCodeDiv, userNumberDiv, pleaseWaitDiv);
+}
+
+function displayHostStanceTakingScreen(debaterNumbers, roundLength = null) {
+    currentScreen = "hostStanceTakingScreen";
+    document.body.innerHTML = '';
+
+    if (roundLength) {
+        document.body.append(getTimer(roundLength));
+        activateTimers();
+    }
+
+    let playerDiv = document.createElement("div");
+    playerDiv.classList.add("testing-textbox");
+    let playerIcons = debaterNumbers.map(getPlayerImg);
+    playerDiv.append(...playerIcons);
+    let playerAnnouncement = document.createElement("h2");
+    playerAnnouncement.innerHTML = "These players are thinking...";
+    playerDiv.append(playerAnnouncement);
+
+    let pleaseWaitDiv = document.createElement("div");
+    pleaseWaitDiv.classList.add("testing-textbox");
+    pleaseWaitDiv.innerHTML = "Please wait for these players to think of their stances. In the meanwhile, you can relax!";
+
+    document.body.append(playerDiv, pleaseWaitDiv);
+}
+
+function displayPlayerWaitStanceScreen() {
+    currentScreen = "playerWaitStanceScreen";
+    document.body.innerHTML = '';
+
+    let pleaseWaitDiv = document.createElement("div");
+    pleaseWaitDiv.classList.add("testing-textbox");
+    pleaseWaitDiv.innerHTML = "Please wait for the others to take their stances!";
+
+    document.body.append(pleaseWaitDiv);
+}
+
+function displayPlayerTakeStanceScreen(question) {
+    currentScreen = "playerTakeStanceScreen";
+    document.body.innerHTML = '';
+
+    let youNextDiv = document.createElement("div");
+    youNextDiv.classList.add("testing-textbox");
+    youNextDiv.innerHTML = "You're up next! Think of a punchy answer for this question:";
+
+    let inputBox = document.createElement("div");
+    inputBox.classList.add("testing-textbox");
+    let inputQuestion = document.createElement("strong");
+    inputQuestion.innerHTML = question;
+    let inputSpace = document.createElement("input");
+    inputSpace.type = "text";
+    inputSpace.placeholder = "What Do You Think?"
+    inputBox.append(inputQuestion, document.createElement("hr"), inputSpace);
+    // TODO: Send my opinion back to the server!
+
+    document.body.append(youNextDiv, inputBox);
+}
+
+function displayHostDebateScreen() {
+    currentScreen = "hostDebateScreen";
+    document.body.innerHTML = '';
+    // TODO: Implement.
+
+    let youNextDiv = document.createElement("div");
+    youNextDiv.classList.add("testing-textbox");
+    youNextDiv.innerHTML = "We're in a debate! Woo! I actually didn't implement this part yet.";
+
+    document.body.append(youNextDiv);
+}
+
+function displayDebaterDebateScreen() {
+    currentScreen = "debaterDebateScreen";
+    document.body.innerHTML = '';
+    // TODO: Implement.
+
+    let youNextDiv = document.createElement("div");
+    youNextDiv.classList.add("testing-textbox");
+    youNextDiv.innerHTML = "Stop looking at your phone! ARGUE YOUR POINT!";
+
+    document.body.append(youNextDiv);
+}
+
+function displayPlayerDebateScreen() {
+    currentScreen = "playerDebateScreen";
+    document.body.innerHTML = '';
+    // TODO: Implement.
+
+    let youNextDiv = document.createElement("div");
+    youNextDiv.classList.add("testing-textbox");
+    youNextDiv.innerHTML = "We're in a debate! Woo! I need to give you buttons to vote for this to be any fun huh?";
+
+    document.body.append(youNextDiv);
 }
 
 // ----------- UPDATE VISUALS ----------------------
@@ -255,6 +363,33 @@ function handleSnapshotMessage(data) {
         
         case "waitingRoom":
             displayPlayerWaitMenu(data["content"]["code"], data["content"]["playerNumber"]);
+            break;
+
+        case "stanceTaking":
+            if (data["content"]["type"] == "host") {
+                displayHostStanceTakingScreen(data["content"]["debaters"].split(","), data["content"]["secondsLeft"]);
+            }
+            else if (data["content"]["type"] == "debaterStanceMissing") {
+                displayDebaterDebateScreen();
+            }
+            else if (data["content"]["type"] == "debaterStanceGiven") {
+
+            }
+            else { // type should be "pickingPlayer"
+                displayPlayerDebateScreen();
+            }
+            break;
+        
+        case "discussion":
+            if (data["content"]["type"] == "host") {
+                displayHostDebateScreen();
+            }
+            else if (data["content"]["type"] == "debater") {
+                displayDebaterDebateScreen();
+            }
+            else { // type should be "pickingPlayer"
+                displayPlayerDebateScreen();
+            }
             break;
 
         default: 
