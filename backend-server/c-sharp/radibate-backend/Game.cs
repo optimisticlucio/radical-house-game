@@ -78,6 +78,11 @@ public class Game
         return playerList.Find(x => x.webSocket == targetWebSocket);
     }
 
+    public Player? GetPlayer(int playerNumber)
+    {
+        return playerList.Find(x => x.playerNumber == playerNumber);
+    }
+
     public async Task SendMessageToHost(OutgoingGameMessage message)
     {
         Console.WriteLine("[GAME] Sending message to host: {0}", message);
@@ -100,6 +105,8 @@ public class Game
         currentGamePhase = new GameState.DisplayResultsPhase(this);
         _ = currentGamePhase.SendSnapshotToAllPlayers();
     }
+
+
 
     public class Player
     {

@@ -447,12 +447,11 @@ function handleSnapshotMessage(data) {
         
         case "discussion":
             if (data["content"]["type"] == "host") {
-                const numOfDebaters = data["content"]["numOfDebaters"];
+                const debaters = data["content"]["debaters"].split(",");
 
                 let debaterInfo = [];
-                for (let i = 0; i < numOfDebaters; i++) {
-                    const debater = {"number": data["content"][`debater${i}`], "position": data["content"][`position${i}`]};
-                    debaterInfo.push(debater);
+                for (let debaterNumber of debaters) {
+                    debaterInfo.push({"number": debaterNumber, "position": data["content"][`position${debaterNumber}`]});
                 }
 
                 displayHostDebateScreen(data["content"]["question"], debaterInfo, data["content"]["undecidedPlayers"].split(","), data["content"]["secondsLeft"]);

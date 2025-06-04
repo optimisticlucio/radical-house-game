@@ -19,11 +19,19 @@ public abstract class GameState
     {
         return Task.Run(() =>
         {
-            foreach (Game.Player player in parentGame.playerList)
+            try
             {
-                _ = player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(player)));
+                foreach (Game.Player player in parentGame.playerList)
+                {
+                    _ = player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(player)));
+                }
+                _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(null as Game.Player)));
             }
-            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(null as Game.Player)));
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            
         }
         );
     }
@@ -120,7 +128,7 @@ public abstract class GameState
             publicDiscussionPhase.setDiscussionTopic(stanceTakingPhase.discussionTopic);
             for (int i = 0; i < stanceTakingPhase.debaters.Length; i++)
             {
-                publicDiscussionPhase.setDebaterInfo(i, stanceTakingPhase.debaters[i], stanceTakingPhase.positions[i]);
+                publicDiscussionPhase.setDebaterInfo(stanceTakingPhase.debaters[i], stanceTakingPhase.positions[i]);
             }
 
             Task publicDiscussion = publicDiscussionPhase.PlayPhase();
@@ -179,7 +187,7 @@ public abstract class GameState
             Task countdownEnded = countdownTimer.StartAsync();
             Console.WriteLine($"[PHASE] Activated StanceTaking phase! Debaters are players: {string.Join(", ", debaters.Select(d => d.playerNumber))}");
 
-            _ = SendSnapshotToAllPlayers();
+            await SendSnapshotToAllPlayers();
 
             await countdownEnded;
         }
@@ -289,13 +297,16 @@ public abstract class GameState
                     if (IsAValidStance(action["stance"]))
                     {
                         positions[playerSpot] = action["stance"];
-                        // Should I do a better message for this?
-                        _ = actingPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(actingPlayer)));
 
                         // Check if all players inputted their stances.
                         if (positions.All(IsAValidStance))
                         {
                             countdownTimer.Cancel();
+                        }
+                        else
+                        {
+                            // Should I do a better message for this?
+                            _ = actingPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(actingPlayer)));
                         }
                     }
                     else
@@ -359,12 +370,11 @@ public abstract class GameState
     public class PublicDiscussionPhase(Game parentGame) : GameState(parentGame)
     {
         private string discussionTopic = "Discussion Topic Not Set!";
-        private Game.Player[] debaters = new Game.Player[2];
-        private string[] positions = new string[2];
+        private Dictionary<Game.Player, string> debaterPositions = new Dictionary<Game.Player, string>();
 
         public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(60);
 
-        // Represents which player agrees with what stance. If player X agrees with the first debater, playerstances[x] = 0.
+        // Represents which player agrees with what stance, set to the relevant player's player number.
         // -1 means did not vote or abstained.
         private Dictionary<Game.Player, int> playerStances = [];
 
@@ -374,16 +384,16 @@ public abstract class GameState
         }
 
         // Sets data regarding the a debating player.
-        public void setDebaterInfo(int debaterNumber, Game.Player debater, string position)
+        public void setDebaterInfo(Game.Player debater, string position)
         {
-            debaters[debaterNumber] = debater;
-            positions[debaterNumber] = position;
+            debaterPositions[debater] = position;
         }
 
         public async override Task PlayPhase()
         {
             Task countdownEnded = countdownTimer.StartAsync();
-            // TODO
+
+            await SendSnapshotToAllPlayers();
 
             await countdownEnded;
         }
@@ -391,19 +401,28 @@ public abstract class GameState
         public override Task End()
         {
             // Gives each debater a score relative to the people who agreed with them.
-            int[] finalScores = new int[debaters.Length];
+            Dictionary<int, int> finalScores = new Dictionary<int, int>();
 
             foreach (Game.Player player in parentGame.playerList)
             {
                 if (playerStances[player] >= 0)
                 {
-                    finalScores[playerStances[player]]++;
+                    if (finalScores.ContainsKey(playerStances[player]))
+                    {
+                        finalScores[playerStances[player]]++;
+                    }
+                    else
+                    {
+                        finalScores[playerStances[player]] = 1;
+                    }
                 }
             }
 
-            for (int i = 0; i < debaters.Length; i++)
+            foreach (int playerNumber in finalScores.Keys)
             {
-                debaters[i].currentScore += finalScores[i];
+                Game.Player player = parentGame.GetPlayer(playerNumber)!;
+                player.currentScore += finalScores[playerNumber];
+
             }
 
             return Task.CompletedTask;
@@ -440,39 +459,38 @@ public abstract class GameState
                 // TODO: Return data for host.
                 gameSnapshot["type"] = "host";
 
-                gameSnapshot["numOfDebaters"] = debaters.Length.ToString();
-                for (int i = 0; i < debaters.Length; i++)
+                gameSnapshot["debaters"] = string.Join(",", debaterPositions.Keys);
+                foreach (KeyValuePair<Game.Player, string> pair in debaterPositions)
                 {
                     // TODO: Pass which players support this given debater. BUCKET THAT SHIT.
-                    gameSnapshot["debater" + i] = debaters[i].playerNumber.ToString();
-                    gameSnapshot["position" + i] = positions[i];
+                    gameSnapshot["position" + pair.Key.playerNumber] = pair.Value;
                 }
 
-                int[] undecidedPlayers = [];
+                List<int> undecidedPlayers = [];
                 foreach (Game.Player player in parentGame.playerList) {
-                    if (!debaters.Contains(player)) undecidedPlayers.Append(player.playerNumber);
+                    if (!debaterPositions.Keys.Contains(player)) undecidedPlayers.Add(player.playerNumber);
                 }
 
-                gameSnapshot["undecidedPlayers"] = String.Join(",", undecidedPlayers.ToString());
+                gameSnapshot["undecidedPlayers"] = string.Join(",", undecidedPlayers.ToString());
             }
 
-            else if (debaters.Contains(requestingPlayer))
+            else if (debaterPositions.Keys.Contains(requestingPlayer))
             {
                 // Return data for debaters.
                 gameSnapshot["type"] = "debater";
                 gameSnapshot["message"] = "Don't look at your phone, CONVINCE PEOPLE!";
-                gameSnapshot["position"] = positions[requestingPlayer.playerNumber];
+                gameSnapshot["position"] = debaterPositions[requestingPlayer];
             }
 
             else
             {
                 // TODO: Return data for players who need to pick.
                 gameSnapshot["type"] = "pickingPlayer";
-                gameSnapshot["debaterNumber"] = debaters.Length.ToString();
-                for (int i = 0; i < debaters.Length; i++)
+                gameSnapshot["debaters"] = string.Join(",", debaterPositions.Keys);
+                foreach (KeyValuePair<Game.Player, string> pair in debaterPositions)
                 {
-                    gameSnapshot["debater" + i] = debaters[i].playerNumber.ToString();
-                    gameSnapshot["position" + i] = positions[i];
+                    // TODO: Pass which players support this given debater. BUCKET THAT SHIT.
+                    gameSnapshot["position" + pair.Key.playerNumber] = pair.Value;
                 }
             }
 
