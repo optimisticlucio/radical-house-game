@@ -101,8 +101,6 @@ public class Game
         _ = currentGamePhase.SendSnapshotToAllPlayers();
     }
 
-    // TODO: Do an actual game loop
-
     public class Player
     {
         public string username = "USERNAME_NOT_SET";

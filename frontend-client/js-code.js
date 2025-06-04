@@ -225,8 +225,8 @@ function displayPlayerTakeStanceScreen(question) {
     inputSpace.placeholder = "What Do You Think?"
     const inputButton = document.createElement("button");
     inputButton.innerText = "Send Response!";
-    inputButton.onclick(() => sendDebaterStance(inputSpace.value));
-    inputBox.append(inputQuestion, document.createElement("hr"), inputSpace);
+    inputButton.onclick = (() => sendDebaterStance(inputSpace.value));
+    inputBox.append(inputQuestion, document.createElement("hr"), inputSpace, inputButton);
 
     document.body.append(youNextDiv, inputBox);
 }
