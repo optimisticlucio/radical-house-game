@@ -249,7 +249,22 @@ public abstract class GameState
                     break;
 
                 case IncomingGameMessage.MessageType.RequestStateInfo:
-                    // TODO: Send back relevant info for client.
+                    if (incomingMessage.requestingSocket == null)
+                    {
+                        // Host
+                        await parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot((Game.Player?)null)));
+                    }
+                    else
+                    {
+                        Game.Player? player = parentGame.GetPlayer(incomingMessage.requestingSocket);
+                        if (player == null)
+                        {
+                            Console.WriteLine("[GAME ERROR] Recieved RequestStateInfo from a player who's not in the game!");
+                            break;
+                        }
+                        await player.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(player)));
+                    }
+
                     break;
 
                 default:
@@ -269,11 +284,25 @@ public abstract class GameState
                         Console.WriteLine("[GAME] Non-acting player tried to input opinion.");
                         break;
                     }
-                    positions[playerSpot] = action["stance"];
 
-                    // TODO: Check if all players inputted stance? 
-                    // Should I do a better message for this?
-                    _ = actingPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(actingPlayer)));
+                    // If it's a valid stance, accept it.
+                    if (IsAValidStance(action["stance"]))
+                    {
+                        positions[playerSpot] = action["stance"];
+                        // Should I do a better message for this?
+                        _ = actingPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, GenerateGameSnapshot(actingPlayer)));
+
+                        // Check if all players inputted their stances.
+                        if (positions.All(IsAValidStance))
+                        {
+                            countdownTimer.Cancel();
+                        }
+                    }
+                    else
+                    {
+                        //TODO: Handle player sending invalid or empty stance.
+                    }
+
                     break;
 
                 default:
@@ -318,6 +347,12 @@ public abstract class GameState
             }
 
             return gameSnapshot;
+        }
+
+        // Returns whether the given stance fits the allowed stance parameters.
+        public static bool IsAValidStance(string stance)
+        {
+            return !string.IsNullOrWhiteSpace(stance);
         }
     }
 
@@ -405,13 +440,20 @@ public abstract class GameState
                 // TODO: Return data for host.
                 gameSnapshot["type"] = "host";
 
-                gameSnapshot["debaterNumber"] = debaters.Length.ToString();
+                gameSnapshot["numOfDebaters"] = debaters.Length.ToString();
                 for (int i = 0; i < debaters.Length; i++)
                 {
                     // TODO: Pass which players support this given debater. BUCKET THAT SHIT.
                     gameSnapshot["debater" + i] = debaters[i].playerNumber.ToString();
                     gameSnapshot["position" + i] = positions[i];
                 }
+
+                int[] undecidedPlayers = [];
+                foreach (Game.Player player in parentGame.playerList) {
+                    if (!debaters.Contains(player)) undecidedPlayers.Append(player.playerNumber);
+                }
+
+                gameSnapshot["undecidedPlayers"] = String.Join(",", undecidedPlayers.ToString());
             }
 
             else if (debaters.Contains(requestingPlayer))

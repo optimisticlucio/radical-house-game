@@ -216,29 +216,54 @@ function displayPlayerTakeStanceScreen(question) {
     youNextDiv.classList.add("testing-textbox");
     youNextDiv.innerHTML = "You're up next! Think of a punchy answer for this question:";
 
-    let inputBox = document.createElement("div");
+    const inputBox = document.createElement("div");
     inputBox.classList.add("testing-textbox");
-    let inputQuestion = document.createElement("strong");
+    const inputQuestion = document.createElement("strong");
     inputQuestion.innerHTML = question;
-    let inputSpace = document.createElement("input");
+    const inputSpace = document.createElement("input");
     inputSpace.type = "text";
     inputSpace.placeholder = "What Do You Think?"
+    const inputButton = document.createElement("button");
+    inputButton.innerText = "Send Response!";
+    inputButton.onclick(() => sendDebaterStance(inputSpace.value));
     inputBox.append(inputQuestion, document.createElement("hr"), inputSpace);
-    // TODO: Send my opinion back to the server!
 
     document.body.append(youNextDiv, inputBox);
 }
 
-function displayHostDebateScreen() {
+function displayHostDebateScreen(question = "Question Not Set In Frontend!", debaters = [{"number": 0, "stance": "Debaters Not Passed in Frontend!"}], undecidedPlayers = [0,0,0], roundLength = 90) {
     currentScreen = "hostDebateScreen";
     document.body.innerHTML = '';
-    // TODO: Implement.
 
-    let youNextDiv = document.createElement("div");
-    youNextDiv.classList.add("testing-textbox");
-    youNextDiv.innerHTML = "We're in a debate! Woo! I actually didn't implement this part yet.";
+    const debateTimer = getTimer(roundLength);
 
-    document.body.append(youNextDiv);
+    const debateQuestion = document.createElement("div");
+    debateQuestion.classList.add("testing-textbox", "debate-question");
+    debateQuestion.innerHTML = `<p>Question:</p><h2>${question}</h2>`;
+
+    const debateOptions = document.createElement("div");
+    debateOptions.classList.add("debate-options");
+    const debaterPodiums = debaters.map((debater) => {
+        const podium = document.createElement("div");
+        podium.classList.add("testing-textbox", "player-stance");
+        podium.id = `player${number}Podium`;
+        const supporterBox = document.createElement("div");
+        supporterBox.classList.add("supporters");
+        podium.append(getPlayerImg(debater["number"]), document.createTextNode(debaters["stance"]), document.createElement(hr), supporterBox);
+    });
+    debateOptions.append(...debaterPodiums);
+
+    const undecidedPodium = document.createElement("div");
+    undecidedPodium.classList.add("testing-textbox", "player-stance");
+    undecidedPodium.id = `undecidedPodium`;
+    const undecidedSupporters = document.createElement("div");
+    undecidedSupporters.classList.add("supporters");
+    const nonDebaterIcons = undecidedPlayers.map(getPlayerImg);
+    undecidedSupporters.append(...nonDebaterIcons);
+    undecidedPodium.append(document.createTextNode("Undecided"), document.createElement(hr), undecidedSupporters)
+
+    document.body.append(debateTimer, debateQuestion, debateOptions, undecidedPodium);
+    activateTimers();
 }
 
 function displayDebaterDebateScreen() {
@@ -346,7 +371,13 @@ function requestGameStart() {
     sendMessageToSocket("GameAction", {
         "action": "startGame"
     });
+}
 
+function sendDebaterStance(stance){
+    sendMessageToSocket("GameAction", {
+        "action": "inputStance",
+        "stance": stance
+    });
 }
 
 // ---------- HANDLE INCOMING MESSAGES -----------------
@@ -416,7 +447,15 @@ function handleSnapshotMessage(data) {
         
         case "discussion":
             if (data["content"]["type"] == "host") {
-                displayHostDebateScreen();
+                const numOfDebaters = data["content"]["numOfDebaters"];
+
+                let debaterInfo = [];
+                for (let i = 0; i < numOfDebaters; i++) {
+                    const debater = {"number": data["content"][`debater${i}`], "position": data["content"][`position${i}`]};
+                    debaterInfo.push(debater);
+                }
+
+                displayHostDebateScreen(data["content"]["question"], debaterInfo, data["content"]["undecidedPlayers"].split(","), data["content"]["secondsLeft"]);
             }
             else if (data["content"]["type"] == "debater") {
                 displayDebaterDebateScreen();
