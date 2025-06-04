@@ -246,10 +246,10 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
     const debaterPodiums = debaters.map((debater) => {
         const podium = document.createElement("div");
         podium.classList.add("testing-textbox", "player-stance");
-        podium.id = `player${number}Podium`;
+        podium.id = `player${debater.number}Podium`;
         const supporterBox = document.createElement("div");
         supporterBox.classList.add("supporters");
-        podium.append(getPlayerImg(debater["number"]), document.createTextNode(debaters["stance"]), document.createElement(hr), supporterBox);
+        podium.append(getPlayerImg(debater["number"]), document.createTextNode(debaters["stance"]), document.createElement("hr"), supporterBox);
     });
     debateOptions.append(...debaterPodiums);
 

@@ -198,15 +198,13 @@ public class SessionManager
             if (gameConnectedTo.Game.hostSocket == socket)
             {
                 //TODO: Handle host leaving game!
+                gameConnectedTo.Game.DisconnectAllPlayers();
             }
             else
             {
                 await gameConnectedTo.Game.disconnectPlayer(socket);
             }
         }
-        
-        
-        
     }
 
     static async Task SendMessageOverSocket(WebSocket socket, CancellationToken token,  OutgoingGameMessage message)

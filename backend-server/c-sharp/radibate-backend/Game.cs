@@ -89,6 +89,15 @@ public class Game
         await hostSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(message.ToString())), WebSocketMessageType.Text, true, hostCancellationToken);
     }
 
+    // Ran when the host DC'd.
+    public void DisconnectAllPlayers()
+    {
+        foreach (Player player in playerList)
+        {
+            _ = player.webSocket!.CloseAsync(WebSocketCloseStatus.NormalClosure, "Host Disconnected from Game", (CancellationToken)player.token!);
+        }
+    }
+
     public async Task PlayRenardEdition()
     {
         // TODO: Add check to make sure there's at least three players in the game.
