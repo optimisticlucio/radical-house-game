@@ -96,8 +96,16 @@ public abstract class GameState
                 case IncomingGameMessage.MessageType.GameAction:
                     if (incomingMessage.requestingSocket == parentGame.hostSocket)
                     {
-                        Console.WriteLine("[GAME] Starting game...");
-                        _ = parentGame.PlayRenardEdition();
+                        if (parentGame.playerList.Count >= 3)
+                        {
+                            Console.WriteLine("[GAME] Starting game...");
+                            _ = parentGame.PlayRenardEdition();
+                        }
+                        else
+                        {
+                            Console.WriteLine("[GAME] Not enough players to start game!");
+                            _ = parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Not enough players!"));
+                        }
                     }
                     else
                     {
@@ -459,7 +467,7 @@ public abstract class GameState
                 // TODO: Return data for host.
                 gameSnapshot["type"] = "host";
 
-                gameSnapshot["debaters"] = string.Join(",", debaterPositions.Keys);
+                gameSnapshot["debaters"] = string.Join(",", debaterPositions.Keys.Select((player) => player.playerNumber));
                 foreach (KeyValuePair<Game.Player, string> pair in debaterPositions)
                 {
                     // TODO: Pass which players support this given debater. BUCKET THAT SHIT.
@@ -471,7 +479,7 @@ public abstract class GameState
                     if (!debaterPositions.Keys.Contains(player)) undecidedPlayers.Add(player.playerNumber);
                 }
 
-                gameSnapshot["undecidedPlayers"] = string.Join(",", undecidedPlayers.ToString());
+                gameSnapshot["undecidedPlayers"] = string.Join(",", undecidedPlayers);
             }
 
             else if (debaterPositions.Keys.Contains(requestingPlayer))
@@ -486,7 +494,7 @@ public abstract class GameState
             {
                 // TODO: Return data for players who need to pick.
                 gameSnapshot["type"] = "pickingPlayer";
-                gameSnapshot["debaters"] = string.Join(",", debaterPositions.Keys);
+                gameSnapshot["debaters"] = string.Join(",", debaterPositions.Keys.Select((player) => player.playerNumber));
                 foreach (KeyValuePair<Game.Player, string> pair in debaterPositions)
                 {
                     // TODO: Pass which players support this given debater. BUCKET THAT SHIT.

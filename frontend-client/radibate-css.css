@@ -31,29 +31,30 @@ body {
     align-items: center;
 }
 
-.ongoing-debate-host > .timer {
+.timer {
     background-color:aliceblue;
     color:chocolate;
 }
 
-.ongoing-debate-host > .debate-question {
+.debate-question {
     text-transform: uppercase;
 }
 
-.ongoing-debate-host > .debate-options {
+.debate-options {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
+    width: 50ch;
     margin: 1em 0;
 }
 
-.ongoing-debate-host .player-stance {
+.player-stance {
     height: 100%;
+    width: 20ch;
 }
 
-.ongoing-debate-host .player-stance > .supporters {
+.player-stance > .supporters {
     display: grid;
     grid-template-columns: repeat(auto-fill, 5ch);
     gap: 0.5ch;

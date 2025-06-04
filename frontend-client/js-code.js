@@ -234,6 +234,7 @@ function displayPlayerTakeStanceScreen(question) {
 function displayHostDebateScreen(question = "Question Not Set In Frontend!", debaters = [{"number": 0, "stance": "Debaters Not Passed in Frontend!"}], undecidedPlayers = [0,0,0], roundLength = 90) {
     currentScreen = "hostDebateScreen";
     document.body.innerHTML = '';
+    console.log(debaters);
 
     const debateTimer = getTimer(roundLength);
 
@@ -249,7 +250,8 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
         podium.id = `player${debater.number}Podium`;
         const supporterBox = document.createElement("div");
         supporterBox.classList.add("supporters");
-        podium.append(getPlayerImg(debater["number"]), document.createTextNode(debaters["stance"]), document.createElement("hr"), supporterBox);
+        podium.append(getPlayerImg(debater["number"]), document.createTextNode(debater["position"]), document.createElement("hr"), supporterBox);
+        return podium;
     });
     debateOptions.append(...debaterPodiums);
 
@@ -260,7 +262,7 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
     undecidedSupporters.classList.add("supporters");
     const nonDebaterIcons = undecidedPlayers.map(getPlayerImg);
     undecidedSupporters.append(...nonDebaterIcons);
-    undecidedPodium.append(document.createTextNode("Undecided"), document.createElement(hr), undecidedSupporters)
+    undecidedPodium.append(document.createTextNode("Undecided"), document.createElement("hr"), undecidedSupporters)
 
     document.body.append(debateTimer, debateQuestion, debateOptions, undecidedPodium);
     activateTimers();
