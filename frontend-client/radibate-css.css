@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "Abraham";
+  src: url(/assets/font/Abraham-Regular.tff);
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -11,6 +16,7 @@ body {
 
     background-image: url("./assets/img/background-1.avif");
     direction: rtl;
+    font-family: 'Abraham';
 }
 
 * { 

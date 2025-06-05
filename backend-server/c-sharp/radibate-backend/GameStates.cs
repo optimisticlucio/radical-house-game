@@ -441,7 +441,14 @@ public abstract class GameState
             switch (incomingMessage.messageType)
             {
                 case IncomingGameMessage.MessageType.GameAction:
-                    // TODO: Player takes action
+                    if (incomingMessage.messageContent!["action"] == "inputSupport")
+                    {
+
+                    }
+                    else
+                    {
+                        Console.WriteLine("[GAME] Client taken invalid action.");
+                    }
                     break;
                 case IncomingGameMessage.MessageType.RequestStateInfo:
                     // TODO: Send back relevant info for client.

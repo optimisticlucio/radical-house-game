@@ -392,6 +392,13 @@ function sendDebaterStance(stance){
     });
 }
 
+function sendDebaterPreference(debaterNumber) {
+    sendMessageToSocket("GameAction", {
+        "action": "inputSupport",
+        "debater": debaterNumber
+    });
+}
+
 // ---------- HANDLE INCOMING MESSAGES -----------------
 
 // Ran whenever the websocket sends a message.
