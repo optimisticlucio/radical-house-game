@@ -1,4 +1,4 @@
-const SERVER_ADDRESS = "radibate-backend.onrender.com"
+const SERVER_ADDRESS = "radical-house-game.onrender.com"
 const socket = new WebSocket("ws://" + SERVER_ADDRESS)
 let currentScreen = "";
 
