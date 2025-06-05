@@ -332,7 +332,13 @@ function displayPlayerLeaderboard() {
     youNextDiv.classList.add("testing-textbox");
     youNextDiv.innerHTML = "זה הכל, תודה ששיחקתם!";
 
-    document.body.append(youNextDiv);
+    let qrResponseDiv = document.createElement("div");
+    qrResponseDiv.classList.add("testing-textbox");
+    const qrResponseImg = document.createElement("img");
+    qrResponseImg.src = "/assets/img/qr-questionnaire.jpg";
+    qrResponseDiv.append(document.createTextNode("נשמח אם תגידו לנו את דעתכם!"), document.createElement("br"), qrResponseImg);
+
+    document.body.append(youNextDiv, qrResponseDiv);
 }
 
 // ----------- UPDATE VISUALS ----------------------
