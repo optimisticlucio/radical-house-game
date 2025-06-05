@@ -4,7 +4,7 @@ namespace radibate_backend;
 
 public static class Utils
 {
-    public static Random rng = new Random();
+    public static Random rng = new Random(Guid.NewGuid().GetHashCode());
 
     public static void Shuffle<T>(this IList<T> list)
     {

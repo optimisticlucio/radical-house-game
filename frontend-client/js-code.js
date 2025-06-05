@@ -78,6 +78,13 @@ function getTimer(seconds) {
     return newTimer;
 }
 
+function movePlayerToPodium(playerNum, targetPodiumNum) {
+    const targetPlayerImg = document.getElementById(`player${playerNum}`);
+    const targetPodium = document.querySelector(`#player${targetPodiumNum}Podium > supporters`);
+
+    targetPodium.append(targetPlayerImg);
+}
+
 // ----------- SWITCH SCREENS ---------------
 
 function serverDeadNotification() {
@@ -266,7 +273,11 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
     undecidedPodium.id = `undecidedPodium`;
     const undecidedSupporters = document.createElement("div");
     undecidedSupporters.classList.add("supporters");
-    const nonDebaterIcons = undecidedPlayers.map(getPlayerImg);
+    const nonDebaterIcons = undecidedPlayers.map((playerNum) => {
+        const playerDiv = getPlayerImg(playerNum);
+        playerDiv.id = `player${playerNum}`;
+        return playerDiv;
+    });
     undecidedSupporters.append(...nonDebaterIcons);
     undecidedPodium.append(document.createTextNode("לא תומכים באף אחד"), document.createElement("hr"), undecidedSupporters)
 
@@ -298,12 +309,13 @@ function displayPlayerDebateScreen(debaters = [0, 0]) {
     const debaterButtons = debaters.map( (debaterNumber) => {
         const debaterButton = document.createElement("button");
         debaterButton.append(getPlayerImg(debaterNumber));
+        debaterButton.onclick = ((event) => sendDebaterPreference(debaterNumber));
         return debaterButton;
     });
 
     const abstainButton = document.createElement("button");
     abstainButton.innerHTML = "לא תומך בשניהם!";
-    //TODO: Connect to function that sets who you support.
+    abstainButton.onclick = ((event) => sendDebaterPreference(-1));
 
     document.body.append(pickFaveDiv, document.createElement("hr"), ...debaterButtons, abstainButton);
 }
