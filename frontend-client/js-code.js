@@ -1,4 +1,4 @@
-const SERVER_ADDRESS = "127.0.0.1:8080"
+const SERVER_ADDRESS = "radibate-backend.onrender.com"
 const socket = new WebSocket("ws://" + SERVER_ADDRESS)
 let currentScreen = "";
 
