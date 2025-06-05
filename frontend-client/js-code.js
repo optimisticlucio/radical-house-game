@@ -1,5 +1,5 @@
 const SERVER_ADDRESS = "radical-house-game.onrender.com"
-const socket = new WebSocket("ws://" + SERVER_ADDRESS)
+const socket = new WebSocket("wss://" + SERVER_ADDRESS)
 let currentScreen = "";
 
 // Log incoming messages
