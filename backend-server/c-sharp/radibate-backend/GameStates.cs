@@ -170,7 +170,7 @@ public abstract class GameState
         public string discussionTopic = "Discussion Topic Not Set!";
         public Game.Player[] debaters = new Game.Player[2];
         public string[] positions = new string[2];
-        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(30);
+        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(60);
 
         public StanceTakingPhase(Game parentGame, List<Game.Player> playersToPickFrom) : base(parentGame)
         {
@@ -380,7 +380,7 @@ public abstract class GameState
         private string discussionTopic = "Discussion Topic Not Set!";
         private Dictionary<Game.Player, string> debaterPositions = new Dictionary<Game.Player, string>();
 
-        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(60);
+        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(50);
 
         // Represents which player agrees with what stance, set to the relevant player's player number.
         // -1 means did not vote or abstained.
