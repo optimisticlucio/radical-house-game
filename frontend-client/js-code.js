@@ -86,7 +86,7 @@ function serverDeadNotification() {
 
     let mainDiv = document.createElement("div");
     mainDiv.classList.add("testing-textbox");
-    mainDiv.appendChild(document.createTextNode("Host server unreachable :("));
+    mainDiv.appendChild(document.createTextNode("איבדנו חיבור לשרת :("));
 
     document.body.appendChild(mainDiv);
 }
@@ -97,25 +97,25 @@ function displayMainMenu() {
 
     let mainDiv = document.createElement("div");
     mainDiv.classList.add("testing-textbox");
-    mainDiv.appendChild(document.createTextNode("Host server reached :)"));
+    mainDiv.appendChild(document.createTextNode("התחברנו לשרת :)"));
 
     let startGameDiv = document.createElement("div");
     startGameDiv.classList.add("testing-textbox");
     let startGameButton = document.createElement("button");
     startGameButton.onclick = requestNewGameCreation;
-    startGameButton.innerText = "Start New Game";
+    startGameButton.innerText = "התחל משחק חדש";
     startGameDiv.appendChild(startGameButton);
     
     let joinGameDiv = document.createElement("div");
     joinGameDiv.classList.add("testing-textbox");
     let joinGameTextInput = document.createElement("input");
     joinGameTextInput.type = "text";
-    joinGameTextInput.placeholder = "Insert Room Code.."
+    joinGameTextInput.placeholder = "הכניסו קוד לחדר.."
     // TODO: Validate that the inputted room code is a valid one?
     joinGameDiv.appendChild(joinGameTextInput);
     let joinGameButton = document.createElement("button");
     joinGameButton.onclick = (() => requestGameJoin(joinGameTextInput.value));
-    joinGameButton.innerText = "Join Game";
+    joinGameButton.innerText = "התחבר למשחק קיים";
     joinGameDiv.appendChild(joinGameButton);
 
     document.body.append(mainDiv, startGameDiv, joinGameDiv);
@@ -129,18 +129,18 @@ function displayHostWaitMenu(roomCode = "MISSING", amountOfPeopleInRoom = 0) {
     roomCodeDiv.classList.add("testing-textbox");
     let roomCodeText = document.createElement("h2");
     roomCodeText.innerText = roomCode;
-    roomCodeDiv.appendChild(document.createTextNode("ROOM CODE:"));
+    roomCodeDiv.appendChild(document.createTextNode("קוד חדר:"));
     roomCodeDiv.appendChild(roomCodeText);
 
     let numberOfPeopleDiv = document.createElement("div");
     numberOfPeopleDiv.classList.add("testing-textbox");
-    numberOfPeopleDiv.appendChild(document.createTextNode("Number of people in room: "));
+    numberOfPeopleDiv.appendChild(document.createTextNode("מספר האנשים בחדר: "));
     let numberOfPeopleSpan = document.createElement("span");
     numberOfPeopleSpan.id = "numOfPeople";
     numberOfPeopleDiv.appendChild(numberOfPeopleSpan);
 
     let gameStartButton = document.createElement("button");
-    gameStartButton.innerText = "Start Game!";
+    gameStartButton.innerText = "התחילו את המשחק!";
     gameStartButton.onclick = requestGameStart;
 
     document.body.append(roomCodeDiv, numberOfPeopleDiv, gameStartButton);
@@ -155,12 +155,12 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
     roomCodeDiv.classList.add("testing-textbox");
     let roomCodeText = document.createElement("h2");
     roomCodeText.innerText = roomCode;
-    roomCodeDiv.appendChild(document.createTextNode("Connected successfully to room number:"));
+    roomCodeDiv.appendChild(document.createTextNode("התחברנו בהצלחה לחדר מספר:"));
     roomCodeDiv.appendChild(roomCodeText);
 
     let userNumberDiv = document.createElement("div");
     userNumberDiv.classList.add("testing-textbox");
-    userNumberDiv.appendChild(document.createTextNode("Your player number: " + userNumber + "\n"));
+    userNumberDiv.appendChild(document.createTextNode("מספר השחקן שלך: " + userNumber + "\n"));
     userNumberDiv.appendChild(document.createElement("br"));
     userNumberDiv.appendChild(document.createElement("br"));
     let playerImg = getPlayerImg(userNumber);
@@ -168,7 +168,7 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
 
     let pleaseWaitDiv = document.createElement("div");
     pleaseWaitDiv.classList.add("testing-textbox");
-    pleaseWaitDiv.innerHTML = "Please wait for the game to be started by the host!";
+    pleaseWaitDiv.innerHTML = "אנא חכו שהמארח יתחיל את המשחק!";
 
     document.body.append(roomCodeDiv, userNumberDiv, pleaseWaitDiv);
 }
@@ -187,12 +187,12 @@ function displayHostStanceTakingScreen(debaterNumbers, roundLength = null) {
     let playerIcons = debaterNumbers.map(getPlayerImg);
     playerDiv.append(...playerIcons);
     let playerAnnouncement = document.createElement("h2");
-    playerAnnouncement.innerHTML = "These players are thinking...";
+    playerAnnouncement.innerHTML = "השחקנים הללו חושבים עדיין...";
     playerDiv.append(playerAnnouncement);
 
     let pleaseWaitDiv = document.createElement("div");
     pleaseWaitDiv.classList.add("testing-textbox");
-    pleaseWaitDiv.innerHTML = "Please wait for these players to think of their stances. In the meanwhile, you can relax!";
+    pleaseWaitDiv.innerHTML = "בבקשה תחכו שהשחקנים יחשבו על תשובות מעניינות. בנתיים, אפשר לנוח!";
 
     document.body.append(playerDiv, pleaseWaitDiv);
 }
@@ -203,7 +203,7 @@ function displayPlayerWaitStanceScreen() {
 
     let pleaseWaitDiv = document.createElement("div");
     pleaseWaitDiv.classList.add("testing-textbox");
-    pleaseWaitDiv.innerHTML = "Please wait for the others to take their stances!";
+    pleaseWaitDiv.innerHTML = "אנא חכו שהשאר יחשבו על תשובה!";
 
     document.body.append(pleaseWaitDiv);
 }
@@ -214,7 +214,7 @@ function displayPlayerTakeStanceScreen(question) {
 
     let youNextDiv = document.createElement("div");
     youNextDiv.classList.add("testing-textbox");
-    youNextDiv.innerHTML = "You're up next! Think of a punchy answer for this question:";
+    youNextDiv.innerHTML = "אתם הבאים! תחשבו על תשובה עסיסית לשאלה הזו:";
 
     const inputBox = document.createElement("div");
     inputBox.classList.add("testing-textbox");
@@ -222,9 +222,9 @@ function displayPlayerTakeStanceScreen(question) {
     inputQuestion.innerHTML = question;
     const inputSpace = document.createElement("input");
     inputSpace.type = "text";
-    inputSpace.placeholder = "What Do You Think?"
+    inputSpace.placeholder = "מה אתם חושבים?"
     const inputButton = document.createElement("button");
-    inputButton.innerText = "Send Response!";
+    inputButton.innerText = "שלחו תשובה!";
     inputButton.onclick = (() => sendDebaterStance(inputSpace.value));
     inputBox.append(inputQuestion, document.createElement("hr"), inputSpace, inputButton);
 
@@ -240,7 +240,7 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
 
     const debateQuestion = document.createElement("div");
     debateQuestion.classList.add("testing-textbox", "debate-question");
-    debateQuestion.innerHTML = `<p>Question:</p><h2>${question}</h2>`;
+    debateQuestion.innerHTML = `<p>שאלה:</p><h2>${question}</h2>`;
 
     const debateOptions = document.createElement("div");
     debateOptions.classList.add("debate-options");
@@ -275,7 +275,7 @@ function displayDebaterDebateScreen() {
 
     let youNextDiv = document.createElement("div");
     youNextDiv.classList.add("testing-textbox");
-    youNextDiv.innerHTML = "Stop looking at your phone! ARGUE YOUR POINT!";
+    youNextDiv.innerHTML = "אל תסתכלו על הטלפון! תשכנעו את הקהל!";
 
     document.body.append(youNextDiv);
 }
@@ -285,11 +285,11 @@ function displayPlayerDebateScreen() {
     document.body.innerHTML = '';
     // TODO: Implement.
 
-    let youNextDiv = document.createElement("div");
-    youNextDiv.classList.add("testing-textbox");
-    youNextDiv.innerHTML = "We're in a debate! Woo! I need to give you buttons to vote for this to be any fun huh?";
+    let pickFaveDiv = document.createElement("div");
+    pickFaveDiv.classList.add("testing-textbox");
+    pickFaveDiv.innerHTML = "אנחנו בדיון! ווהו! ... אני כנראה צריך לתכנת כפתורים בשביל להצביע אה.";
 
-    document.body.append(youNextDiv);
+    document.body.append(pickFaveDiv);
 }
 
 function displayHostLeaderboard() {
@@ -300,7 +300,7 @@ function displayHostLeaderboard() {
 
     let youNextDiv = document.createElement("div");
     youNextDiv.classList.add("testing-textbox");
-    youNextDiv.innerHTML = "Game's Over! Someone won! I really gotta set this up.";
+    youNextDiv.innerHTML = "סוף המשחק הגיע! עדיין לא תכנתתי לוח של מי שקביל הכי הרבה נקודות, סורי!";
 
     document.body.append(youNextDiv);
 }
@@ -314,7 +314,7 @@ function displayPlayerLeaderboard() {
 
     let youNextDiv = document.createElement("div");
     youNextDiv.classList.add("testing-textbox");
-    youNextDiv.innerHTML = "Game's over, go to bed.";
+    youNextDiv.innerHTML = "זה הכל, תודה ששיחקתם!";
 
     document.body.append(youNextDiv);
 }
