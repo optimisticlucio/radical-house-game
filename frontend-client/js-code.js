@@ -318,7 +318,13 @@ function displayHostLeaderboard() {
     youNextDiv.classList.add("testing-textbox");
     youNextDiv.innerHTML = "סוף המשחק הגיע! עדיין לא תכנתתי לוח של מי שקביל הכי הרבה נקודות, סורי!";
 
-    document.body.append(youNextDiv);
+    let qrResponseDiv = document.createElement("div");
+    qrResponseDiv.classList.add("testing-textbox");
+    const qrResponseImg = document.createElement("img");
+    qrResponseImg.src = "/assets/img/qr-questionnaire.jpg";
+    qrResponseDiv.append(document.createTextNode("נשמח אם תגידו לנו את דעתכם!"), document.createElement("br"), qrResponseImg);
+
+    document.body.append(youNextDiv, qrResponseDiv);
 }
 
 function displayPlayerLeaderboard() {
@@ -331,12 +337,6 @@ function displayPlayerLeaderboard() {
     let youNextDiv = document.createElement("div");
     youNextDiv.classList.add("testing-textbox");
     youNextDiv.innerHTML = "זה הכל, תודה ששיחקתם!";
-
-    let qrResponseDiv = document.createElement("div");
-    qrResponseDiv.classList.add("testing-textbox");
-    const qrResponseImg = document.createElement("img");
-    qrResponseImg.src = "/assets/img/qr-questionnaire.jpg";
-    qrResponseDiv.append(document.createTextNode("נשמח אם תגידו לנו את דעתכם!"), document.createElement("br"), qrResponseImg);
 
     document.body.append(youNextDiv, qrResponseDiv);
 }
