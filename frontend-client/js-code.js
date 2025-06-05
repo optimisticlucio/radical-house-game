@@ -158,6 +158,11 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
     roomCodeDiv.appendChild(document.createTextNode("התחברנו בהצלחה לחדר מספר:"));
     roomCodeDiv.appendChild(roomCodeText);
 
+    let qrCodeDiv = document.createElement("div");
+    let qrCodeImg = document.createElement("img");
+    qrCodeImg.src = "/assets/img/qr-code.jpg";
+    qrCodeDiv.append(document.createTextNode("סרקו אותי בשביל לשחק!"), qrCodeImg);
+
     let userNumberDiv = document.createElement("div");
     userNumberDiv.classList.add("testing-textbox");
     userNumberDiv.appendChild(document.createTextNode("מספר השחקן שלך: " + userNumber + "\n"));
@@ -170,7 +175,7 @@ function displayPlayerWaitMenu(roomCode = "MISSING", userNumber = -1) {
     pleaseWaitDiv.classList.add("testing-textbox");
     pleaseWaitDiv.innerHTML = "אנא חכו שהמארח יתחיל את המשחק!";
 
-    document.body.append(roomCodeDiv, userNumberDiv, pleaseWaitDiv);
+    document.body.append(roomCodeDiv, qrCodeDiv, userNumberDiv, pleaseWaitDiv);
 }
 
 function displayHostStanceTakingScreen(debaterNumbers, roundLength = null) {
