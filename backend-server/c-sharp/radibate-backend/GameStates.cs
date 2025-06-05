@@ -380,7 +380,7 @@ public abstract class GameState
         private string discussionTopic = "Discussion Topic Not Set!";
         private Dictionary<Game.Player, string> debaterPositions = new Dictionary<Game.Player, string>();
 
-        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(50);
+        public Utils.CountdownTimer countdownTimer = new Utils.CountdownTimer(70);
 
         // Represents which player agrees with what stance, set to the relevant player's player number.
         // -1 means did not vote or abstained.
@@ -436,14 +436,20 @@ public abstract class GameState
             return Task.CompletedTask;
         }
 
-        public override Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
+        public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
         {
             switch (incomingMessage.messageType)
             {
                 case IncomingGameMessage.MessageType.GameAction:
                     if (incomingMessage.messageContent!["action"] == "inputSupport")
                     {
-
+                        Game.Player player = parentGame.GetPlayer(incomingMessage.requestingSocket)!;
+                        playerStances[player] = int.Parse(incomingMessage.messageContent["debater"]);
+                        await parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.GameUpdate, new Dictionary<string, string>
+                        {
+                            {"playerToMove", player.playerNumber.ToString()},
+                            {"targetPodium", incomingMessage.messageContent["debater"]}
+                        }));
                     }
                     else
                     {
@@ -457,8 +463,6 @@ public abstract class GameState
                     Console.WriteLine("[GAME] Client message invalid during StanceTakingPhase.");
                     break;
             }
-
-            return Task.CompletedTask;
         }
 
         public override Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer)

@@ -453,6 +453,8 @@ function handleIncomingMessage(event) {
             hostWaitMenuIncomingMessages(parsedData);
             break;
 
+        // TODO: Move characters based on message from GameStates during debate screen.
+
         default:
             console.log("[ERROR!] Current screen is set to: " + currentScreen +". Not a valid screen! Incoming message discarded as a result.");
     }
