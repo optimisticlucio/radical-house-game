@@ -280,7 +280,7 @@ function displayDebaterDebateScreen() {
     document.body.append(youNextDiv);
 }
 
-function displayPlayerDebateScreen() {
+function displayPlayerDebateScreen(debaters = [0, 0]) {
     currentScreen = "playerDebateScreen";
     document.body.innerHTML = '';
     // TODO: Implement.
@@ -289,7 +289,17 @@ function displayPlayerDebateScreen() {
     pickFaveDiv.classList.add("testing-textbox");
     pickFaveDiv.innerHTML = "אנחנו בדיון! ווהו! ... אני כנראה צריך לתכנת כפתורים בשביל להצביע אה.";
 
-    document.body.append(pickFaveDiv);
+    const debaterButtons = debaters.map( (debaterNumber) => {
+        const debaterButton = document.createElement("button");
+        debaterButton.append(getPlayerImg(debaterNumber));
+        //TODO: Connect to function that sets who you support.
+    });
+
+    const abstainButton = document.createElement("button");
+    abstainButton.innerHTML = "לא תומך בשניהם!";
+    //TODO: Connect to function that sets who you support.
+
+    document.body.append(pickFaveDiv, document.createElement("hr"), ...debaterButtons, abstainButton);
 }
 
 function displayHostLeaderboard() {
@@ -462,7 +472,7 @@ function handleSnapshotMessage(data) {
                 displayDebaterDebateScreen();
             }
             else { // type should be "pickingPlayer"
-                displayPlayerDebateScreen();
+                displayPlayerDebateScreen(data["content"]["debaters"].split(","));
             }
             break;
 
