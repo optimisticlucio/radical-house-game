@@ -252,7 +252,7 @@ public class SessionManager
             if (Game != null)
                 throw new Exception("Tried to generate new key for active game.");
 
-            SessionKey = Utils.rng.Next(0, 1000000).ToString();
+            SessionKey = Utils.rng.Next(0, 100).ToString();
             return SessionKey;
         }
 
