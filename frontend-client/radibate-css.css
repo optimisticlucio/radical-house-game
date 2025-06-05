@@ -16,7 +16,7 @@ body {
     box-sizing: border-box;
 }
 
-button { 
+button, input { 
     font-size: 1em;
 }
 
