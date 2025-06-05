@@ -101,7 +101,7 @@ public class Game
     public async Task PlayRenardEdition()
     {
         // TODO: Add check to make sure there's at least three players in the game.
-        const int TOTAL_ROUNDS = 1;
+        const int TOTAL_ROUNDS = 3;
         Console.WriteLine("[PHASE] RenardEdition Started!");
 
         for (currentRoundNumber = 1; currentRoundNumber <= TOTAL_ROUNDS; currentRoundNumber++)
