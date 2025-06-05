@@ -8,7 +8,8 @@ namespace radibate_backend;
 
 public class SessionManager
 {
-    public static string ServerAddress = "http://127.0.0.1:8080/";
+    public static string ServerAddress = $"http://+:{Environment.GetEnvironmentVariable("PORT") ?? "8080"}/";
+
     private readonly HttpListener httpListener = new();
     private readonly ConcurrentDictionary<string, GameInfo> gameSessions = new();
     private CancellationTokenSource? cts;
