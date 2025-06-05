@@ -125,85 +125,94 @@ public class SessionManager
         var buffer = new byte[1024];
         GameInfo? gameConnectedTo = null;
 
-        while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
+        try
         {
-            var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-
-            if (result.MessageType == WebSocketMessageType.Close)
+            while (!token.IsCancellationRequested && socket.State == WebSocketState.Open)
             {
-                await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Goodbye", token);
-                break;
-            }
+                var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
 
-            string msg = Encoding.UTF8.GetString(buffer, 0, result.Count).Trim();
-            Console.WriteLine($"[Game] Received message: {msg}");
-
-            IncomingGameMessage incomingClientMessage = IncomingGameMessage.ParseIncomingRequest(msg, socket);
-            switch (incomingClientMessage.messageType)
-            {
-                case IncomingGameMessage.MessageType.CreateGame:
-                    if (gameConnectedTo != null)
-                    {
-                        // User is in a game.
-                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
-                        break;
-                    }
-                    gameConnectedTo = StartNewGame(socket, token);
-                    await gameConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Goodbye", token);
                     break;
+                }
 
-                case IncomingGameMessage.MessageType.ConnectToGame:
-                    if (gameConnectedTo != null)
-                    {
-                        // User is in a game.
-                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot join a game while already in one."));
-                        break;
-                    }
-                    if (incomingClientMessage.messageContent is null || !gameSessions.ContainsKey(incomingClientMessage.messageContent["gameCode"]))
-                    {
-                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Requested invalid room code."));
-                        break;
-                    }
-                    GameInfo requestedGame = gameSessions[incomingClientMessage.messageContent["gameCode"]];
-                    if (requestedGame.Game!.playerList.Count >= Game.MAX_PLAYERS)
-                    {
-                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Game is full!"));
-                        break;
-                    }
-                    await requestedGame.Game.addNewPlayer(socket, token);
-                    gameConnectedTo = requestedGame;
-                    break;
+                string msg = Encoding.UTF8.GetString(buffer, 0, result.Count).Trim();
+                Console.WriteLine($"[Game] Received message: {msg}");
 
-                case IncomingGameMessage.MessageType.GameAction:
-                    if (gameConnectedTo == null)
-                    {
-                        // User is not connected.
-                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot take a game action without being in a game."));
+                IncomingGameMessage incomingClientMessage = IncomingGameMessage.ParseIncomingRequest(msg, socket);
+                switch (incomingClientMessage.messageType)
+                {
+                    case IncomingGameMessage.MessageType.CreateGame:
+                        if (gameConnectedTo != null)
+                        {
+                            // User is in a game.
+                            await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot create new game while in a game."));
+                            break;
+                        }
+                        gameConnectedTo = StartNewGame(socket, token);
+                        await gameConnectedTo!.Game!.currentGamePhase.SendSnapshotToAllPlayers();
                         break;
-                    }
 
-                    _ = gameConnectedTo.Game!.currentGamePhase.RecievePlayerMessage(incomingClientMessage);
-                    break;
+                    case IncomingGameMessage.MessageType.ConnectToGame:
+                        if (gameConnectedTo != null)
+                        {
+                            // User is in a game.
+                            await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot join a game while already in one."));
+                            break;
+                        }
+                        if (incomingClientMessage.messageContent is null || !gameSessions.ContainsKey(incomingClientMessage.messageContent["gameCode"]))
+                        {
+                            await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Requested invalid room code."));
+                            break;
+                        }
+                        GameInfo requestedGame = gameSessions[incomingClientMessage.messageContent["gameCode"]];
+                        if (requestedGame.Game!.playerList.Count >= Game.MAX_PLAYERS)
+                        {
+                            await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Game is full!"));
+                            break;
+                        }
+                        await requestedGame.Game.addNewPlayer(socket, token);
+                        gameConnectedTo = requestedGame;
+                        break;
 
-                default:
-                    await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Invalid request type recieved."));
-                    Console.WriteLine("[SessionManager] Recieved invalid request type.");
-                    break;
+                    case IncomingGameMessage.MessageType.GameAction:
+                        if (gameConnectedTo == null)
+                        {
+                            // User is not connected.
+                            await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Client cannot take a game action without being in a game."));
+                            break;
+                        }
+
+                        _ = gameConnectedTo.Game!.currentGamePhase.RecievePlayerMessage(incomingClientMessage);
+                        break;
+
+                    default:
+                        await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Invalid request type recieved."));
+                        Console.WriteLine("[SessionManager] Recieved invalid request type.");
+                        break;
+                }
             }
         }
-
-        // CONNECTION CLOSED!
-
-        if (gameConnectedTo != null && gameConnectedTo.Game != null) {
-            // Notify that someone left!
-            if (gameConnectedTo.Game.hostSocket == socket)
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[GameSessionLoopAsync] Error: {ex.Message}");
+        }
+        finally
+        {
+            // CONNECTION CLOSED!
+            if (gameConnectedTo != null && gameConnectedTo.Game != null)
             {
-                //TODO: Handle host leaving game!
-                gameConnectedTo.Game.DisconnectAllPlayers();
-            }
-            else
-            {
-                await gameConnectedTo.Game.disconnectPlayer(socket);
+                // Notify that someone left!
+                if (gameConnectedTo.Game.hostSocket == socket)
+                {
+                    //TODO: Handle host leaving game!
+                    gameConnectedTo.Game.DisconnectAllPlayers();
+                }
+                else
+                {
+                    await gameConnectedTo.Game.disconnectPlayer(socket);
+                }
             }
         }
     }
