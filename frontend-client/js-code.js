@@ -133,9 +133,10 @@ function displayHostWaitMenu(roomCode = "MISSING", amountOfPeopleInRoom = 0) {
     roomCodeDiv.appendChild(roomCodeText);
 
     let qrCodeDiv = document.createElement("div");
+    qrCodeDiv.classList.add("testing-textbox");
     let qrCodeImg = document.createElement("img");
     qrCodeImg.src = "/assets/img/qr-code.jpg";
-    qrCodeDiv.append(document.createTextNode("סרקו אותי בשביל לשחק!"), qrCodeImg);
+    qrCodeDiv.append(document.createTextNode("סרקו אותי בשביל לשחק!"), document.createElement("br"), qrCodeImg);
 
     let numberOfPeopleDiv = document.createElement("div");
     numberOfPeopleDiv.classList.add("testing-textbox");
