@@ -287,12 +287,12 @@ function displayPlayerDebateScreen(debaters = [0, 0]) {
 
     let pickFaveDiv = document.createElement("div");
     pickFaveDiv.classList.add("testing-textbox");
-    pickFaveDiv.innerHTML = "אנחנו בדיון! ווהו! ... אני כנראה צריך לתכנת כפתורים בשביל להצביע אה.";
+    pickFaveDiv.innerHTML = "במי אתם תומכים? (לא הספקתי לתכנת את הכפתורים שיעבדו, סורי!)";
 
     const debaterButtons = debaters.map( (debaterNumber) => {
         const debaterButton = document.createElement("button");
         debaterButton.append(getPlayerImg(debaterNumber));
-        //TODO: Connect to function that sets who you support.
+        return debaterButton;
     });
 
     const abstainButton = document.createElement("button");
