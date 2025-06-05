@@ -262,7 +262,7 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
     undecidedSupporters.classList.add("supporters");
     const nonDebaterIcons = undecidedPlayers.map(getPlayerImg);
     undecidedSupporters.append(...nonDebaterIcons);
-    undecidedPodium.append(document.createTextNode("Undecided"), document.createElement("hr"), undecidedSupporters)
+    undecidedPodium.append(document.createTextNode("לא תומכים באף אחד"), document.createElement("hr"), undecidedSupporters)
 
     document.body.append(debateTimer, debateQuestion, debateOptions, undecidedPodium);
     activateTimers();
