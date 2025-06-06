@@ -51,7 +51,21 @@ public class IncomingGameMessage
 
             foreach (var prop in contentElement.EnumerateObject())
             {
-                messageContent[prop.Name] = prop.Value.GetString() ?? "";
+                var value = prop.Value;
+                switch (value.ValueKind)
+                {
+                    case JsonValueKind.String:
+                        messageContent[prop.Name] = value.GetString()!;
+                        break;
+                    case JsonValueKind.Number:
+                        messageContent[prop.Name] = value.GetRawText(); // or value.ToString()
+                        break;
+                    case JsonValueKind.Null:
+                        messageContent[prop.Name] = "";
+                        break;
+                    default:
+                        throw new ArgumentException($"Unsupported JSON value type for property '{prop.Name}' - {value.ValueKind}");
+                }
             }
         }
 
