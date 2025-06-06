@@ -447,7 +447,8 @@ public abstract class GameState
                         playerStances[player] = int.Parse(incomingMessage.messageContent["debater"]);
                         await parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.GameUpdate, new Dictionary<string, string>
                         {
-                            {"playerToMove", player.playerNumber.ToString()},
+                            {"event", "movePlayerToPodium"},
+                            { "playerToMove", player.playerNumber.ToString()},
                             {"targetPodium", incomingMessage.messageContent["debater"]}
                         }));
                     }

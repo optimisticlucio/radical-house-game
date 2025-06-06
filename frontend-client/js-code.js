@@ -78,13 +78,6 @@ function getTimer(seconds) {
     return newTimer;
 }
 
-function movePlayerToPodium(playerNum, targetPodiumNum) {
-    const targetPlayerImg = document.getElementById(`player${playerNum}`);
-    const targetPodium = document.querySelector(`#player${targetPodiumNum}Podium > supporters`);
-
-    targetPodium.append(targetPlayerImg);
-}
-
 // ----------- SWITCH SCREENS ---------------
 
 function serverDeadNotification() {
@@ -270,7 +263,7 @@ function displayHostDebateScreen(question = "Question Not Set In Frontend!", deb
 
     const undecidedPodium = document.createElement("div");
     undecidedPodium.classList.add("testing-textbox", "player-stance");
-    undecidedPodium.id = `undecidedPodium`;
+    undecidedPodium.id = `player-1Podium`;
     const undecidedSupporters = document.createElement("div");
     undecidedSupporters.classList.add("supporters");
     const nonDebaterIcons = undecidedPlayers.map((playerNum) => {
@@ -304,7 +297,7 @@ function displayPlayerDebateScreen(debaters = [0, 0]) {
 
     let pickFaveDiv = document.createElement("div");
     pickFaveDiv.classList.add("testing-textbox");
-    pickFaveDiv.innerHTML = "במי אתם תומכים? (לא הספקתי לתכנת את הכפתורים שיעבדו, סורי!)";
+    pickFaveDiv.innerHTML = "במי אתם תומכים?";
 
     const debaterButtons = debaters.map( (debaterNumber) => {
         const debaterButton = document.createElement("button");
@@ -357,6 +350,13 @@ function displayPlayerLeaderboard() {
 
 function updateAmountOfPeopleInWaitingRoom(number = -1) {
     document.getElementById("numOfPeople").innerText = number;
+}
+
+function movePlayerToPodium(playerNum, targetPodiumNum) {
+    const targetPlayerImg = document.getElementById(`player${playerNum}`);
+    const targetPodium = document.querySelector(`#player${targetPodiumNum}Podium > supporters`);
+
+    targetPodium.append(targetPlayerImg);
 }
 
 // ----------- SERVER COMMUNICATION --------------------
@@ -453,8 +453,9 @@ function handleIncomingMessage(event) {
             hostWaitMenuIncomingMessages(parsedData);
             break;
 
-        // TODO: Move characters based on message from GameStates during debate screen.
-
+        case "hostDebateScreen":
+            hostDebateScreenIncomingMessages(parsedData);
+            break;
         default:
             console.log("[ERROR!] Current screen is set to: " + currentScreen +". Not a valid screen! Incoming message discarded as a result.");
     }
@@ -551,4 +552,21 @@ function hostWaitMenuIncomingMessages(data) {
     }
 }
 
+function hostDebateScreenIncomingMessages(data) {
+    switch (data["type"]) {
+        case "GameUpdate":
+            switch(data["content"]["event"]) {
+                case "movePlayerToPodium":
+                    movePlayerToPodium(data["content"]["playerToMove"], data["content"]["targetPodium"]);
+                    break;
 
+                default:
+                    console.log("[ERROR!] Recieved an invalid event for game data! " + JSON.stringify(data));
+                    break;
+            }
+            break;
+
+        default:
+            console.log("[ERROR!] Invalid message type recieved for main menu: " + JSON.stringify(data));
+    }
+}
