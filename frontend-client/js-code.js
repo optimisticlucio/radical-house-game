@@ -354,7 +354,7 @@ function updateAmountOfPeopleInWaitingRoom(number = -1) {
 
 function movePlayerToPodium(playerNum, targetPodiumNum) {
     const targetPlayerImg = document.getElementById(`player${playerNum}`);
-    const targetPodium = document.querySelector(`#player${targetPodiumNum}Podium > supporters`);
+    const targetPodium = document.querySelector(`#player${targetPodiumNum}Podium > .supporters`);
 
     targetPodium.append(targetPlayerImg);
 }
