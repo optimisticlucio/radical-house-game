@@ -16,11 +16,15 @@ function HostPregame({ roomCode = "MISSING" }) {
       registerUpdatePlayersInWaitingRoom(setPlayers);
     }, []);
 
+    useEffect( () => {    
+      console.log(`Value of Players is ${JSON.stringify(players)}`);
+    }, [players])
+
   return (
     <>
       <div className="textbox">
         <h1>התחברו למשחק!</h1>
-        <h2>{roomCode}</h2>
+        <h2>קוד חדר: {roomCode}</h2>
       </div>
 
     <div className="textbox">

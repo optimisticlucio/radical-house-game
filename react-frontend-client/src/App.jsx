@@ -27,6 +27,8 @@ export function registerSwitchWindows(fn) {
   SwitchWindows = fn;
 }
 
+export let exportedCurrentScreen = "";
+
 export function App() {
   const [currentScreen, setCurrentScreen] = useState(SCREENS.LOADING_SCREEN);
   const [serverData, setServerData] = useState([]);
@@ -34,6 +36,7 @@ export function App() {
   useEffect(() => {
     // Display currentScreen every time there's a change.
     console.log(`currentScreen set to ${currentScreen}`);
+    exportedCurrentScreen = currentScreen;
   }, [currentScreen]);
 
   useEffect(() => {

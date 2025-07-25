@@ -23,21 +23,26 @@ public class Game
         this.roomCode = roomCode;
     }
 
-    public Dictionary<string, string> getPlayerDictionary()
+    public Dictionary<string,string>[] getPlayerDictionary()
     {
-        Dictionary<string, string> dict = new Dictionary<string, string>();
+        List<Dictionary<string, string>> list = new List<Dictionary<string, string>>();
 
-        foreach (Player player in playerList) {
-            dict.Add("username", player.username);
-            dict.Add("playerNumber", player.playerNumber.ToString());
+        foreach (Player player in playerList)
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>()
+            {
+                {"username", player.username},
+                {"playerNumber", player.playerNumber.ToString()}
+            };
+            list.Add(dict);
         }
 
-        return dict;
+        return list.ToArray();
     }
 
-    public async Task addNewPlayer(WebSocket newPlayerSocket, CancellationToken newPlayerToken)
+    public async Task addNewPlayer(WebSocket newPlayerSocket, CancellationToken newPlayerToken, string username = "MISSING_USERNAME")
     {
-        Player newPlayer = new Player("USERNAMES_NOT_HANDLED_YET", newPlayerSocket, newPlayerToken);
+        Player newPlayer = new Player(username, newPlayerSocket, newPlayerToken);
         playerList.Add(newPlayer);
 
         // Give player an unused player number.

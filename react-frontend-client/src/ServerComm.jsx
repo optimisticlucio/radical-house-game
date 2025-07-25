@@ -1,10 +1,9 @@
-import { SwitchWindows, SCREENS } from "./App.jsx";
+import { SwitchWindows, SCREENS, exportedCurrentScreen } from "./App.jsx";
 import { movePlayerToPodium } from "./screens/HostDebate.jsx";
 import { UpdatePlayersInWaitingRoom } from "./screens/HostPregame.jsx";
 
 const SERVER_ADDRESS = "radical-house-game.onrender.com";
 let socket;
-let currentScreen = ""; // TODO - Connect with main CurrentScreen
 
 export function initializeConnection() {
   if (socket) return;
@@ -133,22 +132,22 @@ function handleIncomingMessage(event) {
     return;
   }
 
-  switch (currentScreen) {
-    case "mainMenu":
+  switch (exportedCurrentScreen) {
+    case SCREENS.MAIN_MENU:
       mainMenuIncomingMessages(parsedData);
       break;
 
-    case "hostWaitMenu":
+    case SCREENS.HOST_PREGAME_SCREEN:
       hostWaitMenuIncomingMessages(parsedData);
       break;
 
-    case "hostDebateScreen":
+    case SCREENS.HOST_DEBATE:
       hostDebateScreenIncomingMessages(parsedData);
       break;
     default:
       console.log(
         "[ERROR!] Current screen is set to: " +
-          currentScreen +
+          exportedCurrentScreen +
           ". Not a valid screen! Incoming message discarded as a result.",
       );
   }
@@ -232,6 +231,8 @@ function hostWaitMenuIncomingMessages(data) {
       switch (data["content"]["event"]) {
         case "playerLeft":
         case "playerJoin":
+          console.log(data.content.players);
+          console.log(JSON.stringify(data.content.players));
           UpdatePlayersInWaitingRoom(data.content.players);
           break;
 
