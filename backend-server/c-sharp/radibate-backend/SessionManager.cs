@@ -172,7 +172,9 @@ public class SessionManager
                             await sendMessageOverSocket(new OutgoingGameMessage(OutgoingGameMessage.MessageType.InvalidRequest, "Game is full!"));
                             break;
                         }
-                        await requestedGame.Game.addNewPlayer(socket, token, incomingClientMessage.messageContent["username"]);
+
+                        await requestedGame.Game.addNewPlayer(socket, token,
+                                incomingClientMessage.messageContent.ContainsKey("username") ? incomingClientMessage.messageContent["username"] : "MISSING_USERNAME");
                         gameConnectedTo = requestedGame;
                         break;
 
