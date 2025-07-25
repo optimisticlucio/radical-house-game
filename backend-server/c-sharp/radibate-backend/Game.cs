@@ -23,13 +23,26 @@ public class Game
         this.roomCode = roomCode;
     }
 
+    public Dictionary<string, string> getPlayerDictionary()
+    {
+        Dictionary<string, string> dict = new Dictionary<string, string>();
+
+        foreach (Player player in playerList) {
+            dict.Add("username", player.username);
+            dict.Add("playerNumber", player.playerNumber.ToString());
+        }
+
+        return dict;
+    }
+
     public async Task addNewPlayer(WebSocket newPlayerSocket, CancellationToken newPlayerToken)
     {
         Player newPlayer = new Player("USERNAMES_NOT_HANDLED_YET", newPlayerSocket, newPlayerToken);
         playerList.Add(newPlayer);
 
         // Give player an unused player number.
-        for (int i = playerList.Count; i > 0; i--) {
+        for (int i = playerList.Count; i > 0; i--)
+        {
             if (playerList.Find((item) => item.playerNumber == i) == null)
             {
                 newPlayer.playerNumber = i;
@@ -37,15 +50,16 @@ public class Game
             }
         }
 
-            OutgoingGameMessage notifyAboutNewPlayer = new OutgoingGameMessage(
-                OutgoingGameMessage.MessageType.GameUpdate,
-                new Dictionary<string, string>()
-                {
+        OutgoingGameMessage notifyAboutNewPlayer = new OutgoingGameMessage(
+            OutgoingGameMessage.MessageType.GameUpdate,
+            new Dictionary<string, object>()
+            {
                 {"event", "playerJoin"},
                 {"username", newPlayer.username},
                 {"playerNum", newPlayer.playerNumber.ToString()},
-                {"totalPlayers", playerList.Count.ToString()}
-                });
+                {"totalPlayers", playerList.Count.ToString()},
+                {"players", getPlayerDictionary()}
+            });
         await SendMessageToHost(notifyAboutNewPlayer);
         await newPlayer.SendMessage(new OutgoingGameMessage(OutgoingGameMessage.MessageType.StanceSnapshot, currentGamePhase.GenerateGameSnapshot(newPlayer)));
     }
@@ -63,12 +77,13 @@ public class Game
         
         OutgoingGameMessage notifyAboutPlayerLeaving = new OutgoingGameMessage(
                 OutgoingGameMessage.MessageType.GameUpdate,
-                new Dictionary<string, string>()
+                new Dictionary<string, object>()
                 {
                 {"event", "playerLeft"},
                 {"username", player.username},
                 {"playerNum", player.playerNumber.ToString()},
-                {"totalPlayers", playerList.Count.ToString()}
+                {"totalPlayers", playerList.Count.ToString()},
+                {"players", getPlayerDictionary()}
                 });
         await SendMessageToHost(notifyAboutPlayerLeaving);
     }
@@ -130,7 +145,6 @@ public class Game
             this.webSocket = webSocket;
             this.token = cancellationToken;
         }
-
         public async Task SendMessage(OutgoingGameMessage message)
         {
             if (webSocket == null)

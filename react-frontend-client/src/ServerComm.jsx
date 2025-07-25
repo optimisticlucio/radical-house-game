@@ -1,9 +1,10 @@
 import { SwitchWindows, SCREENS } from "./App.jsx";
 import { movePlayerToPodium } from "./screens/HostDebate.jsx";
+import { UpdatePlayersInWaitingRoom } from "./screens/HostPregame.jsx";
 
 const SERVER_ADDRESS = "radical-house-game.onrender.com";
 let socket;
-let currentScreen = "";
+let currentScreen = ""; // TODO - Connect with main CurrentScreen
 
 export function initializeConnection() {
   if (socket) return;
@@ -231,7 +232,7 @@ function hostWaitMenuIncomingMessages(data) {
       switch (data["content"]["event"]) {
         case "playerLeft":
         case "playerJoin":
-          updateAmountOfPeopleInWaitingRoom(data["content"]["totalPlayers"]);
+          UpdatePlayersInWaitingRoom(data.content.players);
           break;
 
         default:

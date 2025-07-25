@@ -4,6 +4,7 @@ import { initializeConnection } from "./ServerComm";
 import MainMenu from "./screens/MainMenu";
 import LoadingScreen from "./screens/LoadingScreen";
 import Disconnected from "./screens/Disconnected";
+import HostPregame from "./screens/HostPregame";
 
 export const SCREENS = {
   DISCONNECTED: "DISCONNECTED",
@@ -36,6 +37,11 @@ export function App() {
   }, [currentScreen]);
 
   useEffect(() => {
+    // Display data every time there's a change.
+    console.log(`serverData set to ${JSON.stringify(serverData)}`);
+  }, [serverData]);
+
+  useEffect(() => {
     // Register setState handlers globally
     registerSwitchWindows((targetWindow, receivedData) => {
       if (!(targetWindow in SCREENS)) {
@@ -45,16 +51,21 @@ export function App() {
 
       setCurrentScreen(targetWindow);
       setServerData(receivedData);
-    });
-
+    }
+    
+  );
+    console.log("SwitchWindows assigned.");
     initializeConnection();
   }, []);
+
+
 
   return (
     <>
       {currentScreen === SCREENS.DISCONNECTED && <Disconnected />}
       {currentScreen === SCREENS.LOADING_SCREEN && <LoadingScreen />}
       {currentScreen === SCREENS.MAIN_MENU && <MainMenu />}
+      {currentScreen === SCREENS.HOST_PREGAME_SCREEN && <HostPregame roomCode={serverData.code} />}
       {!(currentScreen in SCREENS) && (
         <h2>ERROR: currentScreen is set to an invalid screen!</h2>
       )}

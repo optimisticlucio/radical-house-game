@@ -1,8 +1,8 @@
 function Disconnected() {
   return (
-    <>
-      <h2>אובד החיבור לשרת!</h2>
-    </>
+    <div className="textbox">
+      <h2>אבד החיבור לשרת!</h2>
+    </div>
   );
 }
 

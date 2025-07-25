@@ -1,0 +1,8 @@
+.textbox {
+    border: 1ch solid black;
+    border-radius: .25ch;
+    background-color: white;
+    color: darkcyan;
+    box-shadow: 1ch 1.5ch 0.5ch rgba(0, 0, 0, .5);
+    padding: 1em
+}

@@ -53,8 +53,16 @@ function MainMenu({ setCurrentScreen }) {
 function GameExplanation({ setCurrentScreen }) {
   return (
     <>
-      <h2>TODO: Make something</h2>
-      <h3>ניסיון נסיון</h3>
+      <div className="textbox">
+        <h1>חוקי המשחק</h1>
+        <p>
+      בכל סיבוב – שני שחקנים מקבלים שאלה. <br/>
+      על שני השחקנים לכתוב תשובה. <br/>
+      לאחר מכן על השחקנים לשכנע את הקהל בתשובתם. <br/>
+      שאר השחקנים מצביעים: מי שכנע יותר? <br/>
+      המנצח בסיבוב -  מי שהצביעו לו יותר. <br/>
+        </p>
+      </div>
       <button onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
         סגור חלון
       </button>
