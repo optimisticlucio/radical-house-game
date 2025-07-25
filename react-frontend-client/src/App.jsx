@@ -7,6 +7,7 @@ import Disconnected from "./screens/Disconnected";
 import HostPregame from "./screens/HostPregame";
 import HostWaitingOnDebaters from "./screens/HostWaitingOnDebaters";
 import HostDebateScreen from "./screens/HostDebate";
+import HostEnd from "./screens/HostEnd";
 
 export const SCREENS = {
   DISCONNECTED: "DISCONNECTED",
@@ -85,6 +86,7 @@ export function App() {
           undecidedPlayers = {serverData.undecidedPlayers.split(",")}
           roundLength = {serverData.secondsLeft}
       />}
+      {currentScreen === SCREENS.HOST_END && <HostEnd />}
       {!(currentScreen in SCREENS) && (
         <h2>ERROR: currentScreen is set to an invalid screen!</h2>
       )}
