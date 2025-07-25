@@ -1,49 +1,50 @@
 import { SwitchWindows, SCREENS } from "./App.jsx";
+import { movePlayerToPodium } from "./screens/HostDebate.jsx";
 
 const SERVER_ADDRESS = "radical-house-game.onrender.com";
 let socket;
 let currentScreen = "";
 
 export function initializeConnection() {
-    if (socket) return;
-    socket = new WebSocket("wss://" + SERVER_ADDRESS);
+  if (socket) return;
+  socket = new WebSocket("wss://" + SERVER_ADDRESS);
 
-    // Log incoming messages
-    socket.addEventListener("message", (event) => {
+  // Log incoming messages
+  socket.addEventListener("message", (event) => {
     console.log("[SERVER MESSAGE] " + event.data);
-    });
+  });
 
-    // Flag to detect if we connected successfully
-    let connected = false;
+  // Flag to detect if we connected successfully
+  let connected = false;
 
-    // TIMEOUT fallback: call this if connection doesn't open in time
-    const handshakeTimeout = setTimeout(() => {
+  // TIMEOUT fallback: call this if connection doesn't open in time
+  const handshakeTimeout = setTimeout(() => {
     if (!connected) {
-        console.log("Handshake timed out — server likely dead.");
-        SwitchWindows(SCREENS.DISCONNECTED);
-        socket.close(); // optional: close if still hanging
+      console.log("Handshake timed out — server likely dead.");
+      SwitchWindows(SCREENS.DISCONNECTED);
+      socket.close(); // optional: close if still hanging
     }
-    }, 3000); // 3 seconds — adjust as needed
+  }, 3000); // 3 seconds — adjust as needed
 
-    socket.addEventListener("open", (event) => {
+  socket.addEventListener("open", (event) => {
     connected = true;
     clearTimeout(handshakeTimeout);
     console.log("Connected to server! Attempting handshake.");
 
     if (performHandshake()) {
-        console.log("Handshake successful!");
-        SwitchWindows(SCREENS.MAIN_MENU);
-        socket.addEventListener("message", handleIncomingMessage);
+      console.log("Handshake successful!");
+      SwitchWindows(SCREENS.MAIN_MENU);
+      socket.addEventListener("message", handleIncomingMessage);
     } else {
-        console.log("Handshake failed!");
-        SwitchWindows(SCREENS.DISCONNECTED);
+      console.log("Handshake failed!");
+      SwitchWindows(SCREENS.DISCONNECTED);
     }
-    });
+  });
 
-    socket.addEventListener("close", (event) => {
+  socket.addEventListener("close", (event) => {
     console.log("Websocket closed!");
     SwitchWindows(SCREENS.DISCONNECTED);
-    });
+  });
 }
 
 function performHandshake() {

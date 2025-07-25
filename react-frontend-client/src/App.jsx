@@ -50,7 +50,6 @@ export function App() {
     initializeConnection();
   }, []);
 
-
   return (
     <>
       {currentScreen === SCREENS.DISCONNECTED && <Disconnected />}

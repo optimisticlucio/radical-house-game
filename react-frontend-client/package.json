@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "iterate": "prettier --write \"src/**/*.{js,jsx,json,css,md}\" && eslint . && vite"
+    "iterate": "prettier --write \"src/**/*.{js,jsx,json,css,md}\" && eslint . && vite",
+    "cleanup": "prettier --write \"src/**/*.{js,jsx,json,css,md}\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

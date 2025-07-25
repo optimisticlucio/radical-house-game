@@ -31,23 +31,21 @@ function WindowSwitcher() {
 }
 
 function MainMenu({ setCurrentScreen }) {
-    const style = css`
-        display: flex;
-        flex-direction: column;
-        gap: 0.5em;
-    `;
+  const style = css`
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  `;
 
   return (
     <div css={style}>
-        <button onClick={() => setCurrentScreen(SCREENS.GAME_RULES)}>
-            חוקי המשחק
-        </button>
-        <button onClick={() => setCurrentScreen(SCREENS.CONNECT)}>
-            התחבר למשחק קיים
-        </button>
-        <button onClick={() => requestNewGameCreation()}>
-            צור משחק חדש
-        </button>
+      <button onClick={() => setCurrentScreen(SCREENS.GAME_RULES)}>
+        חוקי המשחק
+      </button>
+      <button onClick={() => setCurrentScreen(SCREENS.CONNECT)}>
+        התחבר למשחק קיים
+      </button>
+      <button onClick={() => requestNewGameCreation()}>צור משחק חדש</button>
     </div>
   );
 }
