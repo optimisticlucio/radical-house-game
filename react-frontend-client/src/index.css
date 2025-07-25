@@ -12,10 +12,16 @@
   background-image: url("/assets/img/background-tiles.png");
   background-size: 100px;
 
+  direction: rtl;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 a {
@@ -32,8 +38,9 @@ body {
   display: flex;
   place-items: center;
   justify-content: center;
-  min-width: 100vw;
-  min-height: 100vh;
+  min-width: 99vw;
+  min-height: 99vh;
+  font-size: 2em;
 }
 
 h1 {
@@ -43,12 +50,13 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid black;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: white;
+  color: darkcyan;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -58,17 +66,4 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }

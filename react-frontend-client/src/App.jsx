@@ -1,35 +1,64 @@
-// import { useState } from 'react'
+import { useEffect, useState } from "react";
 import "./App.css";
-import * as HostScreens from "./screens/GameHostScreens.jsx";
+import { initializeConnection } from "./ServerComm";
+import MainMenu from "./screens/MainMenu";
+import LoadingScreen from "./screens/LoadingScreen";
+import Disconnected from "./screens/Disconnected";
 
 export const SCREENS = {
-  LOADING_SCREEN: "loading_screen",
-  MAIN_MENU: "main_menu",
-  HOST_PREGAME_SCREEN: "host_pregame_screen",
-  PLAYER_PREGAME_SCREEN: "player_pregame_screen",
-  HOST_WAITING_ON_DEBATERS: "host_waiting_on_debaters",
-  PLAYER_WAITING_ON_DEBATERS: "player_waiting_on_debaters",
-  DEBATER_INPUT_ANSWER: "debater_input_answer",
-  DEBATER_DEBATE: "debater_debate",
-  PLAYER_DEBATE: "player_debate",
+  DISCONNECTED: "DISCONNECTED",
+  LOADING_SCREEN: "LOADING_SCREEN",
+  MAIN_MENU: "MAIN_MENU",
+  HOST_PREGAME_SCREEN: "HOST_PREGAME_SCREEN",
+  PLAYER_PREGAME_SCREEN: "PLAYER_PREGAME_SCREEN",
+  HOST_WAITING_ON_DEBATERS: "HOST_WAITING_ON_DEBATERS",
+  PLAYER_WAITING_ON_DEBATERS: "PLAYER_WAITING_ON_DEBATERS",
+  DEBATER_INPUT_ANSWER: "DEBATER_INPUT_ANSWER",
+  DEBATER_DEBATE: "DEBATER_DEBATE",
+  PLAYER_DEBATE: "PLAYER_DEBATE",
   HOST_DEBATE: "host_debate",
   PLAYER_END: "player_end",
-  HOST_END: "host_end"
-}
+  HOST_END: "host_end",
+};
 
-export function SwitchWindows(targetWindow, recievedData) {
-  switch (targetWindow) {
-    default:
-      console.error(`SwitchWindow recieved invalid target window: ${targetWindow}`);
-      break;
-  }
+export let SwitchWindows = (targetWindow, receivedData) => {};
+export function registerSwitchWindows(fn) {
+  SwitchWindows = fn;
 }
 
 export function App() {
+  const [currentScreen, setCurrentScreen] = useState(SCREENS.LOADING_SCREEN);
+  const [serverData, setServerData] = useState([]);
+
+  useEffect(() => {
+    // Display currentScreen every time there's a change.
+    console.log(`currentScreen set to ${currentScreen}`);
+  }, [currentScreen]);
+
+  useEffect(() => {
+    // Register setState handlers globally
+    registerSwitchWindows((targetWindow, receivedData) => {
+      if (!(targetWindow in SCREENS)) {
+        console.warn(`Received invalid target window: ${targetWindow}!`);
+        return;
+      }
+
+      setCurrentScreen(targetWindow);
+      setServerData(receivedData);
+    });
+
+    initializeConnection();
+  }, []);
+
+
   return (
     <>
-      <h2>TODO: Make something</h2>
-      <h3>ניסיון נסיון</h3>
+      {currentScreen === SCREENS.DISCONNECTED && <Disconnected />}
+      {currentScreen === SCREENS.LOADING_SCREEN && <LoadingScreen />}
+      {currentScreen === SCREENS.MAIN_MENU && <MainMenu />}
+      {!(currentScreen in SCREENS) && (
+        <h2>ERROR: currentScreen is set to an invalid screen!</h2>
+      )}
     </>
   );
 }
