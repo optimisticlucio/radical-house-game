@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { css } from "@emotion/react";
 import { PlayerImg } from "../misc/PlayerImg";
+import Timer from "../misc/Timer";
 
 // Podium component with label and supporters (players)
 function Podium({ id, label, players }) {
@@ -16,19 +17,6 @@ function Podium({ id, label, players }) {
       </div>
     </div>
   );
-}
-
-// Timer component counting down visually
-function DebateTimer({ roundLength }) {
-  const [timeLeft, setTimeLeft] = useState(roundLength);
-
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-    const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    return () => clearTimeout(timerId);
-  }, [timeLeft]);
-
-  return <div className="timer">Time Left: {timeLeft}s</div>;
 }
 
 export const movePlayerToPodium = (playerNum, targetPodiumId) => {};
@@ -85,7 +73,7 @@ export default function HostDebateScreen({
 
   return (
     <>
-      <DebateTimer roundLength={roundLength} />
+      <Timer roundLength={roundLength} />
 
       <div className="testing-textbox debate-question">
         <p>שאלה:</p>

@@ -183,16 +183,6 @@ function handleSnapshotMessage(data) {
 
     case "discussion":
       if (data["content"]["type"] == "host") {
-        const debaters = data["content"]["debaters"].split(",");
-
-        let debaterInfo = [];
-        for (let debaterNumber of debaters) {
-          debaterInfo.push({
-            number: debaterNumber,
-            position: data["content"][`position${debaterNumber}`],
-          });
-        }
-
         SwitchWindows(SCREENS.HOST_DEBATE, data["content"]);
       } else if (data["content"]["type"] == "debater") {
         SwitchWindows(SCREENS.DEBATER_DEBATE, data["content"]);

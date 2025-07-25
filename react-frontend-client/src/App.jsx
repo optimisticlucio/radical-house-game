@@ -5,6 +5,8 @@ import MainMenu from "./screens/MainMenu";
 import LoadingScreen from "./screens/LoadingScreen";
 import Disconnected from "./screens/Disconnected";
 import HostPregame from "./screens/HostPregame";
+import HostWaitingOnDebaters from "./screens/HostWaitingOnDebaters";
+import HostDebateScreen from "./screens/HostDebate";
 
 export const SCREENS = {
   DISCONNECTED: "DISCONNECTED",
@@ -17,9 +19,9 @@ export const SCREENS = {
   DEBATER_INPUT_ANSWER: "DEBATER_INPUT_ANSWER",
   DEBATER_DEBATE: "DEBATER_DEBATE",
   PLAYER_DEBATE: "PLAYER_DEBATE",
-  HOST_DEBATE: "host_debate",
-  PLAYER_END: "player_end",
-  HOST_END: "host_end",
+  HOST_DEBATE: "HOST_DEBATE",
+  PLAYER_END: "PLAYER_END",
+  HOST_END: "HOST_END",
 };
 
 export let SwitchWindows = (targetWindow, receivedData) => {};
@@ -69,6 +71,20 @@ export function App() {
       {currentScreen === SCREENS.LOADING_SCREEN && <LoadingScreen />}
       {currentScreen === SCREENS.MAIN_MENU && <MainMenu />}
       {currentScreen === SCREENS.HOST_PREGAME_SCREEN && <HostPregame roomCode={serverData.code} />}
+      {currentScreen === SCREENS.HOST_WAITING_ON_DEBATERS && <HostWaitingOnDebaters 
+          debaters={serverData.debatersWithNames
+            .match(/\(([^)]+)\)/g) // extract each "(1,Alice)" part
+            .map(item => {
+              const [playerNumber, username] = item.slice(1, -1).split(",");
+              return { playerNumber: Number(playerNumber), username };
+            })} 
+        />}
+      {currentScreen === SCREENS.HOST_DEBATE && <HostDebateScreen
+          question = {serverData.question}
+          debaters = {serverData.debaters.split(",").map(number => ({number, position: serverData[`position${number}`]}))}
+          undecidedPlayers = {serverData.undecidedPlayers.split(",")}
+          roundLength = {serverData.secondsLeft}
+      />}
       {!(currentScreen in SCREENS) && (
         <h2>ERROR: currentScreen is set to an invalid screen!</h2>
       )}

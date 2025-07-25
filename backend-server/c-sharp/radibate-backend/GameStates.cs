@@ -343,7 +343,8 @@ public abstract class GameState
             {
                 // Host message
                 gameSnapshot["type"] = "host";
-                gameSnapshot["debaters"] = String.Join(",", debaters.Select(n => n.playerNumber.ToString()));
+                gameSnapshot["debaters"] = String.Join(",", debaters.Select(n => n.playerNumber.ToString())); // TODO: Remove once new frontend complete.
+                gameSnapshot["debatersWithNames"] = String.Join(",", debaters.Select(n => String.Format("({0},{1})", n.playerNumber.ToString(), n.username)));
             }
             else if (debaters.Contains(requestingPlayer))
             {

@@ -44,7 +44,9 @@ function HostPregame({ roomCode = "MISSING" }) {
     </div>
       
 
+    {players.length >= 3 && 
       <button onClick={requestGameStart}>התחל משחק!</button>
+    }
     </>
   );
 }

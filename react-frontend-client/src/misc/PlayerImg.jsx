@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-export function PlayerImg({ playerNumber }) {
+export function PlayerImg({ playerNumber, username }) {
   return (
     <img
       src={`/assets/img/player-icons/${playerNumber}.png`}
