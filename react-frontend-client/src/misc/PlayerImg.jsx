@@ -1,4 +1,4 @@
-function PlayerImg({ playerNumber }) {
+export function PlayerImg({ playerNumber }) {
   return (
     <img
       src={`/assets/img/player-icons/${playerNumber}.png`}
@@ -8,5 +8,3 @@ function PlayerImg({ playerNumber }) {
     />
   );
 }
-
-export default HostDebate;
