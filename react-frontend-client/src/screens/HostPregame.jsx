@@ -36,7 +36,9 @@ function HostPregame({ roomCode = "MISSING" }) {
         gap: 1em;
         `}>
         {players.map(({username, playerNumber}) => {
-            <PlayerImg playerNumber={playerNumber} />
+          return (<>
+              <PlayerImg playerNumber={playerNumber} />
+          </>)
         })}
       </div>
     </div>

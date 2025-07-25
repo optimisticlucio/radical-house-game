@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+import { css } from "@emotion/react";
 export function PlayerImg({ playerNumber }) {
   return (
     <img
@@ -5,6 +7,9 @@ export function PlayerImg({ playerNumber }) {
       className="character-icon"
       alt={`Player ${playerNumber}`}
       id={`player${playerNumber}`}
+      css={css`
+        width: 2em;
+        `}
     />
   );
 }
