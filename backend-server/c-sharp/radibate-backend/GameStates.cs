@@ -54,9 +54,6 @@ public abstract class GameState
     public abstract Dictionary<string, string> GenerateGameSnapshot(Game.Player? requestingPlayer); // If host requesting, requestingPlayer is null.
     public abstract Task End();
 
-    // TODO: Add a "Show Results" state
-    // TODO: Respond to player messages
-
     public class AwaitingPlayersPhase(Game parentGame) : GameState(parentGame)
     {
         public override Task End()
