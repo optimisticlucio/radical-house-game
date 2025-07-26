@@ -19,7 +19,7 @@ function Podium({ id, label, players }) {
   );
 }
 
-export const movePlayerToPodium = (playerNum, targetPodiumId) => {};
+export let movePlayerToPodium = (playerNum, targetPodiumId) => {};
 function registerMovePlayerToPodium(fn) {
   movePlayerToPodium = fn;
 }
@@ -59,17 +59,18 @@ export default function HostDebateScreen({
         }
 
         // Add playerNum to target podium
-        if (!newPodiums[targetPodiumId]) {
-          newPodiums[targetPodiumId] = [];
+        if (!newPodiums[`player${targetPodiumId}Podium`]) {
+          newPodiums[`player${targetPodiumId}Podium`] = [];
         }
-        newPodiums[targetPodiumId].push(playerNum);
+        newPodiums[`player${targetPodiumId}Podium`].push(playerNum);
 
+        console.log(`Set New Podiums to ${JSON.stringify(newPodiums)}`);
         return newPodiums;
       });
       
     }
     registerMovePlayerToPodium(fn);
-  })
+  },[])
 
   return (
     <>

@@ -12,5 +12,5 @@ export default function Timer({ roundLength }) {
     return () => clearTimeout(timerId);
   }, [timeLeft]);
 
-  return <div className="timer">Time Left: {timeLeft}s</div>;
+  return <div className="timer">שניות נותרות: {timeLeft}</div>;
 }
