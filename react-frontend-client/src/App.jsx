@@ -87,7 +87,16 @@ export function App() {
           undecidedPlayers = {serverData.undecidedPlayers.split(",")}
           roundLength = {serverData.secondsLeft}
       />}
-      {currentScreen === SCREENS.HOST_END && <HostEnd />}
+      {currentScreen === SCREENS.HOST_END && <HostEnd 
+          players={serverData.playersPoints.split(",").map((player) => {
+            const playerData = player.split("|");
+            return {
+              number: playerData[0],
+              username: playerData[1],
+              score: playerData[2]
+            };
+          })}
+      />}
       {!(currentScreen in SCREENS) && (
         <h2>ERROR: currentScreen is set to an invalid screen!</h2>
       )}

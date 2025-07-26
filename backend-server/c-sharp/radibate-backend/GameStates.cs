@@ -548,7 +548,10 @@ public abstract class GameState
             else
             {
                 gameSnapshot["type"] = "host";
-                // TODO: Handle data for host.
+                gameSnapshot["playersPoints"] = String.Join(",", leaderboard.Select((player) =>
+                {
+                    return String.Format("{0}|{1}|{2}", player.playerNumber, player.username, player.currentScore);
+                }));
             }
 
             return gameSnapshot;
