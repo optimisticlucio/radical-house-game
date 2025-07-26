@@ -410,20 +410,17 @@ public abstract class GameState
 
             Console.WriteLine("[DEBUG] Starting Public Discussion Point Taking!");
 
-            foreach (Game.Player player in parentGame.playerList)
+            foreach (int stance in playerStances.Values)
             {
-                Console.WriteLine("[DEBUG] Player number {0}'s stance was {1}.", player.playerNumber, playerStances[player]);
-
-                if (playerStances[player] >= 0)
+                if (stance >= 0)
                 {
-                    Console.WriteLine("[DEBUG] Adding point.");
-                    if (finalScores.ContainsKey(playerStances[player]))
+                    if (finalScores.ContainsKey(stance))
                     {
-                        finalScores[playerStances[player]]++;
+                        finalScores[stance]++;
                     }
                     else
                     {
-                        finalScores[playerStances[player]] = 1;
+                        finalScores[stance] = 1;
                     }
                 }
             }
