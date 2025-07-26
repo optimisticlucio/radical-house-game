@@ -79,6 +79,7 @@ export function App() {
               const [playerNumber, username] = item.slice(1, -1).split(",");
               return { playerNumber: Number(playerNumber), username };
             })} 
+          timeleft={serverData.secondsLeft}
         />}
       {currentScreen === SCREENS.HOST_DEBATE && <HostDebateScreen
           question = {serverData.question}
