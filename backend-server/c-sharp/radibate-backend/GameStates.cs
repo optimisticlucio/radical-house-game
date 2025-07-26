@@ -412,10 +412,15 @@ public abstract class GameState
             // Gives each debater a score relative to the people who agreed with them.
             Dictionary<int, int> finalScores = new Dictionary<int, int>();
 
+            Console.WriteLine("[DEBUG] Starting Public Discussion Point Taking!");
+
             foreach (Game.Player player in parentGame.playerList)
             {
+                Console.WriteLine("[DEBUG] Player number {0}'s stance was {1}.", player.playerNumber, playerStances[player]);
+
                 if (playerStances[player] >= 0)
                 {
+                    Console.WriteLine("[DEBUG] Adding point.");
                     if (finalScores.ContainsKey(playerStances[player]))
                     {
                         finalScores[playerStances[player]]++;
