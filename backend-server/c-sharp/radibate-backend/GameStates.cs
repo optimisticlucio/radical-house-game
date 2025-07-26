@@ -431,7 +431,7 @@ public abstract class GameState
             {
                 Game.Player player = parentGame.GetPlayer(playerNumber)!;
                 player.currentScore += finalScores[playerNumber];
-
+                Console.WriteLine("[DEBUG] Gave player number {0}, {1} points. Point total is now {2}.", playerNumber, finalScores[playerNumber], player.currentScore);
             }
 
             return Task.CompletedTask;

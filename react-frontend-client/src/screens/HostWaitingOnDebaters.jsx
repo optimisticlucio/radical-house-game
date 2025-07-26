@@ -8,11 +8,16 @@ function HostWaitingOnDebaters({ debaters, timeleft }) {
   return (
     <div className="textbox">
       <h2>השחקנים האלה כרגע חושבים על תשובות!</h2>
-      {debaters.map(({playerNumber, username}) => (
+
+      <div css={css`display: flex; justify-content: center;`}>
+        {debaters.map(({playerNumber, username}) => (
         <PlayerImg playerNumber={playerNumber} username={username} />
       ))}
+      </div>
 
-      <Timer roundLength={timeleft} />
+      <div css={css`margin: auto; width: fit-content;`}>
+        <Timer roundLength={timeleft} />
+      </div>
     </div>
   );
 }

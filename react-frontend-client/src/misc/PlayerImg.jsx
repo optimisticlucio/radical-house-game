@@ -9,6 +9,7 @@ export function PlayerImg({ playerNumber, username }) {
       id={`player${playerNumber}`}
       css={css`
         width: 2em;
+        object-fit:contain;
         `}
     />
   );

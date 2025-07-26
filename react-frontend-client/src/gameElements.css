@@ -35,6 +35,7 @@
 
 .undecidedPodium .podiumSupporters {
     justify-content: center;
+    min-height: 2em;
 }
 
 .podiumFloor {

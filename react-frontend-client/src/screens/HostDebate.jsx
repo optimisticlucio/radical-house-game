@@ -95,7 +95,7 @@ export default function HostDebateScreen({
   return (
     <>
       <div className="textbox">
-        <h2>{question}</h2>
+        <h2 css={css`text-align: center`}>{question}</h2>
       </div>
 
       <div css={css`
