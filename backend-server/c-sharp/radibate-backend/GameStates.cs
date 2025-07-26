@@ -173,6 +173,7 @@ public abstract class GameState
             // Pick two random people from the Players to Pick From var.
             playersToPickFrom = [.. playersToPickFrom]; // Shallow clone.
             playersToPickFrom.Shuffle();
+            playersToPickFrom.Sort((playera, playerb) => playera.timesDebated.CompareTo(playerb.timesDebated)); // Pick players who've been infrequent debaters to keep fairness
 
             Console.WriteLine("[DEBUG] Number of players in stancetaking phase is {0}", playersToPickFrom.Count);
 

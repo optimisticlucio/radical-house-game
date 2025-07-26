@@ -38,7 +38,7 @@ function DebaterPodium({ podiums, number, position, flip = false }) {
   return <Podium
           key={pid}
           id={pid}
-          label={position || `Debater ${number}`}
+          label={position || `לא שלחת תשובה. תמציא משהו!`}
           players={podiums[pid] || []}
           flip={flip}
         />
