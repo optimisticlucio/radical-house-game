@@ -52,3 +52,10 @@
     flex-direction: column;
     flex-grow: 1;
 }
+
+input {
+    background-color: white;
+    color: #1037b7;
+    padding: 0.2ch;
+    margin: 1ch 0;
+}

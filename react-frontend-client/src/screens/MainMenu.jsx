@@ -78,12 +78,11 @@ function ConnectToGame({ setCurrentScreen }) {
       <div className="textbox">
         <h2>כתוב את קוד החדר</h2>
         <input type="text" id="roomcode"></input>
-        <button className="textbox" onClick={() => requestGameJoin(document.getElementById("roomcode").value)}>
+        <br />
+        <button onClick={() => requestGameJoin(document.getElementById("roomcode").value)}>
           התחבר
         </button>
       </div>
-      <h2>TODO: Make something</h2>
-      <h3>ניסיון נסיון</h3>
       <button className="textbox" onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
         סגור חלון
       </button>
