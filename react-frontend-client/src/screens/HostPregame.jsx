@@ -27,13 +27,18 @@ function HostPregame({ roomCode = "MISSING" }) {
         <h2>קוד חדר: {roomCode}</h2>
       </div>
 
-    <div className="textbox">
+    <div className="textbox"
+    css={css`
+          margin: 1em 0;
+        `}>
         {players.length < 3 && <p css={css`text-align:center`}>
             צריך לפחות 3 שחקנים בשביל לשחק!
         </p>}
         <div css={css`
         display:flex;
         gap: 1em;
+        justify-content: center;
+        flex-wrap: wrap;
         `}>
         {players.map(({username, playerNumber}) => {
           return (<>

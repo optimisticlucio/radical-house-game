@@ -1,8 +1,54 @@
 .textbox {
-    border: 1ch solid black;
+    border: .5ch solid black;
     border-radius: .25ch;
     background-color: white;
-    color: darkcyan;
+    color: #1037b7;
     box-shadow: 1ch 1.5ch 0.5ch rgba(0, 0, 0, .5);
-    padding: 1em
+    padding: .75em;
+    margin: 1em 0;
+}
+
+.textbox :first-child{
+    margin-top: 0;
+}
+
+.textbox :last-child {
+    margin-bottom: 0;
+}
+
+.podiumSupporters {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    position: relative;
+    top: 0.75em;
+}
+
+.podiumSupporters.flip {
+    justify-content: flex-end;
+}
+
+.undecidedPodium .podiumFloor {
+    background-image: url("/assets/img/undecidedPodiumStrip.png");
+    height: 1em;
+}
+
+.undecidedPodium .podiumSupporters {
+    justify-content: center;
+}
+
+.podiumFloor {
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+    background-image: url("/assets/img/podiumStrip.png");
+
+    height: 2em;
+    width: 100%;
+    content: '';
+}
+
+.podium {
+    display:flex;
+    flex-direction: column;
+    flex-grow: 1;
 }

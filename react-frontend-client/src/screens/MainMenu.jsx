@@ -39,13 +39,15 @@ function MainMenu({ setCurrentScreen }) {
 
   return (
     <div css={style}>
-      <button onClick={() => setCurrentScreen(SCREENS.GAME_RULES)}>
+      <img src="/assets/img/logo.png" />
+
+      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.GAME_RULES)}>
         חוקי המשחק
       </button>
-      <button onClick={() => setCurrentScreen(SCREENS.CONNECT)}>
+      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.CONNECT)}>
         התחבר למשחק קיים
       </button>
-      <button onClick={() => requestNewGameCreation()}>צור משחק חדש</button>
+      <button className="textbox" onClick={() => requestNewGameCreation()}>צור משחק חדש</button>
     </div>
   );
 }
@@ -63,7 +65,7 @@ function GameExplanation({ setCurrentScreen }) {
       המנצח בסיבוב -  מי שהצביעו לו יותר. <br/>
         </p>
       </div>
-      <button onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
+      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
         סגור חלון
       </button>
     </>
@@ -75,7 +77,7 @@ function ConnectToGame({ setCurrentScreen }) {
     <>
       <h2>TODO: Make something</h2>
       <h3>ניסיון נסיון</h3>
-      <button onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
+      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
         סגור חלון
       </button>
     </>

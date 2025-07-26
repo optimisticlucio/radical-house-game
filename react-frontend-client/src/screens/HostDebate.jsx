@@ -5,16 +5,25 @@ import { PlayerImg } from "../misc/PlayerImg";
 import Timer from "../misc/Timer";
 
 // Podium component with label and supporters (players)
-function Podium({ id, label, players }) {
+function Podium({ id, label, players, flip=false }) {
   return (
-    <div className="testing-textbox player-stance" id={id}>
-      <div>{label}</div>
-      <hr />
-      <div className="supporters">
+    <div className="podium" id={id}
+      css={css`font-size:1.5em;`}>
+      <div className="textbox" 
+        css={css`flex-grow:1;`}>
+        <p>
+          {label}
+        </p>
+        <span>
+          מספר תומכים: {players.length - 1}
+        </span>
+      </div>
+      <div className={`podiumSupporters ${flip && "flip"}`}>
         {players.map((num) => (
           <PlayerImg key={num} playerNumber={num} />
         ))}
       </div>
+      <div className="podiumFloor"></div>
     </div>
   );
 }
@@ -22,6 +31,17 @@ function Podium({ id, label, players }) {
 export let movePlayerToPodium = (playerNum, targetPodiumId) => {};
 function registerMovePlayerToPodium(fn) {
   movePlayerToPodium = fn;
+}
+
+function DebaterPodium({ podiums, number, position, flip = false }) {
+  const pid = `player${number}Podium`;
+  return <Podium
+          key={pid}
+          id={pid}
+          label={position || `Debater ${number}`}
+          players={podiums[pid] || []}
+          flip={flip}
+        />
 }
 
 // Main Host Debate Screen component
@@ -42,7 +62,7 @@ export default function HostDebateScreen({
       init[pid] = [debater.number];
     });
 
-    init["undecidedPodium"] = [...undecidedPlayers];
+    init["player-1Podium"] = [...undecidedPlayers];
     return init;
   });
 
@@ -74,31 +94,27 @@ export default function HostDebateScreen({
 
   return (
     <>
-      <Timer roundLength={roundLength} />
-
-      <div className="testing-textbox debate-question">
-        <p>שאלה:</p>
+      <div className="textbox">
         <h2>{question}</h2>
       </div>
 
-      <div className="debate-options">
-        {debaters.map((debater) => {
-          const pid = `player${debater.number}Podium`;
-          return (
-            <Podium
-              key={pid}
-              id={pid}
-              label={debater.position || `Debater ${debater.number}`}
-              players={podiums[pid] || []}
-            />
-          );
-        })}
+      <div css={css`
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        `}>
+        <DebaterPodium podiums={podiums} flip={true} {...debaters[0]}/>
+        <Timer roundLength={roundLength} />
+        <DebaterPodium podiums={podiums} {...debaters[1]}/>
+      </div>
 
-        <Podium
-          id="undecidedPodium"
-          label="לא תומכים באף אחד"
-          players={podiums["undecidedPodium"] || []}
-        />
+      <div className="undecidedPodium">
+        <div className="podiumSupporters">
+          {podiums["player-1Podium"].map((num) => (
+            <PlayerImg key={num} playerNumber={num} />
+          ))}
+        </div>
+        <div className="podiumFloor"></div>
       </div>
     </>
   );
