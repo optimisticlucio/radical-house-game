@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { useState } from "react";
-import { requestNewGameCreation } from "../ServerComm.jsx";
+import { requestNewGameCreation, requestGameJoin } from "../ServerComm.jsx";
 import { css } from "@emotion/react";
 
 const SCREENS = {
@@ -75,6 +75,13 @@ function GameExplanation({ setCurrentScreen }) {
 function ConnectToGame({ setCurrentScreen }) {
   return (
     <>
+      <div className="textbox">
+        <h2>כתוב את קוד החדר</h2>
+        <input type="text" id="roomcode"></input>
+        <button className="textbox" onClick={() => requestGameJoin(document.getElementById("roomcode").value)}>
+          התחבר
+        </button>
+      </div>
       <h2>TODO: Make something</h2>
       <h3>ניסיון נסיון</h3>
       <button className="textbox" onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
