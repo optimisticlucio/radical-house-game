@@ -22,7 +22,7 @@ function PlayerScore({ ranking, playerNumber, username, score }) {
   return (
     <div>
       <div css={css`display:flex; flex-direction: row; align-items: center;`}>
-        <div css={css`font-size: 4em; display:flex; color: #d16264ff;`}>{ranking}</div>
+        <div css={css`font-size: 4em; display:flex; color: #c27272;`}>{ranking}</div>
         <div css={css`margin-top: 1em; font-size: 1.5em;`}>
           <PlayerImg playerNumber={playerNumber} username={username} />
         </div>

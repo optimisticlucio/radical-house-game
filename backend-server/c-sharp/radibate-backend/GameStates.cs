@@ -144,10 +144,9 @@ public abstract class GameState
             await publicDiscussion;
         }
 
-        public override Task End()
+        public override async Task End()
         {
-            // TODO
-            return Task.CompletedTask;
+            await publicDiscussionPhase!.End();
         }
 
         public override async Task RecievePlayerMessage(IncomingGameMessage incomingMessage)
@@ -451,6 +450,7 @@ public abstract class GameState
                     {
                         Game.Player player = parentGame.GetPlayer(incomingMessage.requestingSocket)!;
                         playerStances[player] = int.Parse(incomingMessage.messageContent["debater"]);
+                        Console.WriteLine("[DEBUG] Recieved message that player number {0} set their stance to {1}", player.playerNumber, playerStances[player]);
                         await parentGame.SendMessageToHost(new OutgoingGameMessage(OutgoingGameMessage.MessageType.GameUpdate, new Dictionary<string, string>
                         {
                             {"event", "movePlayerToPodium"},
