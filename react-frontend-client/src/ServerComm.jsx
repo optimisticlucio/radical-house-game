@@ -95,14 +95,14 @@ export function requestGameStart() {
   });
 }
 
-function sendDebaterStance(stance) {
+export function sendDebaterStance(stance) {
   sendMessageToSocket("GameAction", {
     action: "inputStance",
     stance: stance,
   });
 }
 
-function sendDebaterPreference(debaterNumber) {
+export function sendDebaterPreference(debaterNumber) {
   sendMessageToSocket("GameAction", {
     action: "inputSupport",
     debater: debaterNumber,
