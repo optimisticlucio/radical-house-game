@@ -8,6 +8,12 @@ import HostPregame from "./screens/HostPregame";
 import HostWaitingOnDebaters from "./screens/HostWaitingOnDebaters";
 import HostDebateScreen from "./screens/HostDebate";
 import HostEnd from "./screens/HostEnd";
+import PlayerPregame from "./screens/PlayerPregame";
+import PlayerWaitingOnDebaters from "./screens/PlayerWaitingOnDebaters";
+import PlayerDebate from "./screens/PlayerDebate";
+import PlayerEnd from "./screens/PlayerEnd";
+import DebaterInputAnswer from "./screens/DebaterInputAnswer";
+import DebaterDebate from "./screens/DebaterDebate";
 
 export const SCREENS = {
   DISCONNECTED: "DISCONNECTED",
@@ -97,6 +103,12 @@ export function App() {
             };
           })}
       />}
+      {currentScreen === SCREENS.PLAYER_PREGAME_SCREEN && <PlayerPregame playerNumber={serverData.playerNumber} />}
+      {currentScreen === SCREENS.PLAYER_WAITING_ON_DEBATERS && <PlayerWaitingOnDebaters />}
+      {currentScreen === SCREENS.PLAYER_DEBATE && <PlayerDebate debaters={serverData.debaters.split(",")} />}
+      {currentScreen === SCREENS.PLAYER_END && <PlayerEnd />}
+      {currentScreen === SCREENS.DEBATER_INPUT_ANSWER && <DebaterInputAnswer question={serverData.question} />}
+      {currentScreen === SCREENS.DEBATER_DEBATE && <DebaterDebate />} 
       {!(currentScreen in SCREENS) && (
         <h2>ERROR: currentScreen is set to an invalid screen!</h2>
       )}
