@@ -63,52 +63,69 @@ export function App() {
 
       setCurrentScreen(targetWindow);
       setServerData(receivedData);
-    }
-    
-  );
+    });
     console.log("SwitchWindows assigned.");
     initializeConnection();
   }, []);
-
-
 
   return (
     <>
       {currentScreen === SCREENS.DISCONNECTED && <Disconnected />}
       {currentScreen === SCREENS.LOADING_SCREEN && <LoadingScreen />}
       {currentScreen === SCREENS.MAIN_MENU && <MainMenu />}
-      {currentScreen === SCREENS.HOST_PREGAME_SCREEN && <HostPregame roomCode={serverData.code} />}
-      {currentScreen === SCREENS.HOST_WAITING_ON_DEBATERS && <HostWaitingOnDebaters 
+      {currentScreen === SCREENS.HOST_PREGAME_SCREEN && (
+        <HostPregame roomCode={serverData.code} />
+      )}
+      {currentScreen === SCREENS.HOST_WAITING_ON_DEBATERS && (
+        <HostWaitingOnDebaters
           debaters={serverData.debatersWithNames
             .match(/\(([^)]+)\)/g) // extract each "(1,Alice)" part
-            .map(item => {
+            .map((item) => {
               const [playerNumber, username] = item.slice(1, -1).split(",");
               return { playerNumber: Number(playerNumber), username };
-            })} 
+            })}
           timeleft={serverData.secondsLeft}
-        />}
-      {currentScreen === SCREENS.HOST_DEBATE && <HostDebateScreen
-          question = {serverData.question}
-          debaters = {serverData.debaters.split(",").map(number => ({number, position: serverData[`position${number}`]}))}
-          undecidedPlayers = {serverData.undecidedPlayers.split(",")}
-          roundLength = {serverData.secondsLeft}
-      />}
-      {currentScreen === SCREENS.HOST_END && <HostEnd 
+        />
+      )}
+      {currentScreen === SCREENS.HOST_DEBATE && (
+        <HostDebateScreen
+          question={serverData.question}
+          debaters={serverData.debaters
+            .split(",")
+            .map((number) => ({
+              number,
+              position: serverData[`position${number}`],
+            }))}
+          undecidedPlayers={serverData.undecidedPlayers.split(",")}
+          roundLength={serverData.secondsLeft}
+        />
+      )}
+      {currentScreen === SCREENS.HOST_END && (
+        <HostEnd
           players={serverData.playersPoints.split(",").map((player) => {
             const playerData = player.split("|");
             return {
               number: playerData[0],
               username: playerData[1],
-              score: playerData[2]
+              score: playerData[2],
             };
           })}
-      />}
-      {currentScreen === SCREENS.PLAYER_PREGAME_SCREEN && <PlayerPregame playerNumber={serverData.playerNumber} />}
-      {currentScreen === SCREENS.PLAYER_WAITING_ON_DEBATERS && <PlayerWaitingOnDebaters />}
-      {currentScreen === SCREENS.PLAYER_DEBATE && <PlayerDebate debaters={serverData.debaters.split(",")} />}
+        />
+      )}
+      {currentScreen === SCREENS.PLAYER_PREGAME_SCREEN && (
+        <PlayerPregame playerNumber={serverData.playerNumber} />
+      )}
+      {currentScreen === SCREENS.PLAYER_WAITING_ON_DEBATERS && (
+        <PlayerWaitingOnDebaters />
+      )}
+      {currentScreen === SCREENS.PLAYER_DEBATE && (
+        <PlayerDebate debaters={serverData.debaters.split(",")} />
+      )}
       {currentScreen === SCREENS.PLAYER_END && <PlayerEnd />}
-      {currentScreen === SCREENS.DEBATER_INPUT_ANSWER && <DebaterInputAnswer question={serverData.question} />}
-      {currentScreen === SCREENS.DEBATER_DEBATE && <DebaterDebate />} 
+      {currentScreen === SCREENS.DEBATER_INPUT_ANSWER && (
+        <DebaterInputAnswer question={serverData.question} />
+      )}
+      {currentScreen === SCREENS.DEBATER_DEBATE && <DebaterDebate />}
       {!(currentScreen in SCREENS) && (
         <h2>ERROR: currentScreen is set to an invalid screen!</h2>
       )}

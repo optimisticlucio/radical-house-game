@@ -6,15 +6,15 @@ import { css } from "@emotion/react";
 export default function Timer({ roundLength }) {
   const [timeLeft, setTimeLeft] = useState(roundLength);
 
-  const style=css`
+  const style = css`
     color: white;
     font-weight: bold;
     -webkit-text-stroke: 0.4ch black;
     paint-order: stroke fill;
     font-size: 2em;
     width: 4ch;
-    text-align:center;
-    margin: .5ch 0;
+    text-align: center;
+    margin: 0.5ch 0;
   `;
 
   useEffect(() => {
@@ -23,5 +23,9 @@ export default function Timer({ roundLength }) {
     return () => clearTimeout(timerId);
   }, [timeLeft]);
 
-  return <div className="timer" css={style}>{timeLeft}</div>;
+  return (
+    <div className="timer" css={style}>
+      {timeLeft}
+    </div>
+  );
 }

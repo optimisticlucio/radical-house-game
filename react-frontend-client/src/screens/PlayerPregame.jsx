@@ -1,6 +1,6 @@
-import PlayerImg from "../PlayerImg.jsx";
+import PlayerImg from "../misc/PlayerImg.jsx";
 
-export default function PlayerPregame( {playerNumber, username}) {
+export default function PlayerPregame({ playerNumber, username }) {
   return (
     <div className="textbox">
       <h2>אנא תחכו שהמשחק יתחיל!</h2>

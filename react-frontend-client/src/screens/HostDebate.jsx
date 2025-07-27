@@ -1,22 +1,27 @@
 /** @jsxImportSource @emotion/react */
 import { useState, useEffect } from "react";
 import { css } from "@emotion/react";
-import { PlayerImg } from "../misc/PlayerImg";
+import PlayerImg from "../misc/PlayerImg";
 import Timer from "../misc/Timer";
 
 // Podium component with label and supporters (players)
-function Podium({ id, label, players, flip=false }) {
+function Podium({ id, label, players, flip = false }) {
   return (
-    <div className="podium" id={id}
-      css={css`font-size:1.5em;`}>
-      <div className="textbox" 
-        css={css`flex-grow:1;`}>
-        <p>
-          {label}
-        </p>
-        <span>
-          מספר תומכים: {players.length - 1}
-        </span>
+    <div
+      className="podium"
+      id={id}
+      css={css`
+        font-size: 1.5em;
+      `}
+    >
+      <div
+        className="textbox"
+        css={css`
+          flex-grow: 1;
+        `}
+      >
+        <p>{label}</p>
+        <span>מספר תומכים: {players.length - 1}</span>
       </div>
       <div className={`podiumSupporters ${flip && "flip"}`}>
         {players.map((num) => (
@@ -35,13 +40,15 @@ function registerMovePlayerToPodium(fn) {
 
 function DebaterPodium({ podiums, number, position, flip = false }) {
   const pid = `player${number}Podium`;
-  return <Podium
-          key={pid}
-          id={pid}
-          label={position || `לא שלחת תשובה. תמציא משהו!`}
-          players={podiums[pid] || []}
-          flip={flip}
-        />
+  return (
+    <Podium
+      key={pid}
+      id={pid}
+      label={position || `לא שלחת תשובה. תמציא משהו!`}
+      players={podiums[pid] || []}
+      flip={flip}
+    />
+  );
 }
 
 // Main Host Debate Screen component
@@ -87,25 +94,32 @@ export default function HostDebateScreen({
         console.log(`Set New Podiums to ${JSON.stringify(newPodiums)}`);
         return newPodiums;
       });
-      
-    }
+    };
     registerMovePlayerToPodium(fn);
-  },[])
+  }, []);
 
   return (
     <>
       <div className="textbox">
-        <h2 css={css`text-align: center`}>{question}</h2>
+        <h2
+          css={css`
+            text-align: center;
+          `}
+        >
+          {question}
+        </h2>
       </div>
 
-      <div css={css`
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        `}>
-        <DebaterPodium podiums={podiums} flip={true} {...debaters[0]}/>
+      <div
+        css={css`
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+        `}
+      >
+        <DebaterPodium podiums={podiums} flip={true} {...debaters[0]} />
         <Timer roundLength={roundLength} />
-        <DebaterPodium podiums={podiums} {...debaters[1]}/>
+        <DebaterPodium podiums={podiums} {...debaters[1]} />
       </div>
 
       <div className="undecidedPodium">

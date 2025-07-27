@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useState, useEffect } from "react";
 import { css } from "@emotion/react";
-import { PlayerImg } from "../misc/PlayerImg";
+import PlayerImg from "../misc/PlayerImg";
 import { requestGameStart } from "../ServerComm";
 
 export let UpdatePlayersInWaitingRoom = (players) => {};
@@ -10,15 +10,15 @@ function registerUpdatePlayersInWaitingRoom(fn) {
 }
 
 function HostPregame({ roomCode = "MISSING" }) {
-    const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState([]);
 
-    useEffect(() => {
-      registerUpdatePlayersInWaitingRoom(setPlayers);
-    }, []);
+  useEffect(() => {
+    registerUpdatePlayersInWaitingRoom(setPlayers);
+  }, []);
 
-    useEffect( () => {    
-      console.log(`Value of Players is ${JSON.stringify(players)}`);
-    }, [players])
+  useEffect(() => {
+    console.log(`Value of Players is ${JSON.stringify(players)}`);
+  }, [players]);
 
   return (
     <>
@@ -27,31 +27,42 @@ function HostPregame({ roomCode = "MISSING" }) {
         <h2>קוד חדר: {roomCode}</h2>
       </div>
 
-    <div className="textbox"
-    css={css`
+      <div
+        className="textbox"
+        css={css`
           margin: 1em 0;
-        `}>
-        {players.length < 3 && <p css={css`text-align:center`}>
+        `}
+      >
+        {players.length < 3 && (
+          <p
+            css={css`
+              text-align: center;
+            `}
+          >
             צריך לפחות 3 שחקנים בשביל לשחק!
-        </p>}
-        <div css={css`
-        display:flex;
-        gap: 1em;
-        justify-content: center;
-        flex-wrap: wrap;
-        `}>
-        {players.map(({username, playerNumber}) => {
-          return (<>
-              <PlayerImg playerNumber={playerNumber} />
-          </>)
-        })}
+          </p>
+        )}
+        <div
+          css={css`
+            display: flex;
+            gap: 1em;
+            justify-content: center;
+            flex-wrap: wrap;
+          `}
+        >
+          {players.map(({ username, playerNumber }) => {
+            return (
+              <>
+                <PlayerImg playerNumber={playerNumber} />
+              </>
+            );
+          })}
+        </div>
       </div>
-    </div>
-      
 
-    {players.length >= 3 && 
-      <button onClick={requestGameStart}>התחל משחק!</button>
-    }
+      {players.length >= 3 && (
+        <button onClick={requestGameStart}>התחל משחק!</button>
+      )}
     </>
   );
 }

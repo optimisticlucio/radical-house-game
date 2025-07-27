@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-export function PlayerImg({ playerNumber, username }) {
+
+export default function PlayerImg({ playerNumber, username }) {
   return (
     <img
       src={`/assets/img/player-icons/${playerNumber}.png`}
@@ -9,8 +10,8 @@ export function PlayerImg({ playerNumber, username }) {
       id={`player${playerNumber}`}
       css={css`
         width: 2em;
-        object-fit:contain;
-        `}
+        object-fit: contain;
+      `}
     />
   );
 }

@@ -41,13 +41,21 @@ function MainMenu({ setCurrentScreen }) {
     <div css={style}>
       <img src="/assets/img/logo.png" />
 
-      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.GAME_RULES)}>
+      <button
+        className="textbox"
+        onClick={() => setCurrentScreen(SCREENS.GAME_RULES)}
+      >
         חוקי המשחק
       </button>
-      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.CONNECT)}>
+      <button
+        className="textbox"
+        onClick={() => setCurrentScreen(SCREENS.CONNECT)}
+      >
         התחבר למשחק קיים
       </button>
-      <button className="textbox" onClick={() => requestNewGameCreation()}>צור משחק חדש</button>
+      <button className="textbox" onClick={() => requestNewGameCreation()}>
+        צור משחק חדש
+      </button>
     </div>
   );
 }
@@ -58,14 +66,17 @@ function GameExplanation({ setCurrentScreen }) {
       <div className="textbox">
         <h1>חוקי המשחק</h1>
         <p>
-      בכל סיבוב – שני שחקנים מקבלים שאלה. <br/>
-      על שני השחקנים לכתוב תשובה. <br/>
-      לאחר מכן על השחקנים לשכנע את הקהל בתשובתם. <br/>
-      שאר השחקנים מצביעים: מי שכנע יותר? <br/>
-      המנצח בסיבוב -  מי שהצביעו לו יותר. <br/>
+          בכל סיבוב – שני שחקנים מקבלים שאלה. <br />
+          על שני השחקנים לכתוב תשובה. <br />
+          לאחר מכן על השחקנים לשכנע את הקהל בתשובתם. <br />
+          שאר השחקנים מצביעים: מי שכנע יותר? <br />
+          המנצח בסיבוב - מי שהצביעו לו יותר. <br />
         </p>
       </div>
-      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
+      <button
+        className="textbox"
+        onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}
+      >
         סגור חלון
       </button>
     </>
@@ -79,11 +90,18 @@ function ConnectToGame({ setCurrentScreen }) {
         <h2>כתוב את קוד החדר</h2>
         <input type="text" id="roomcode"></input>
         <br />
-        <button onClick={() => requestGameJoin(document.getElementById("roomcode").value)}>
+        <button
+          onClick={() =>
+            requestGameJoin(document.getElementById("roomcode").value)
+          }
+        >
           התחבר
         </button>
       </div>
-      <button className="textbox" onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}>
+      <button
+        className="textbox"
+        onClick={() => setCurrentScreen(SCREENS.MAIN_MENU)}
+      >
         סגור חלון
       </button>
     </>
